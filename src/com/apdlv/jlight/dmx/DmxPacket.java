@@ -1,7 +1,8 @@
-package com.apdlv.test;
+package com.apdlv.jlight.dmx;
 
-class DmxPacket {
-	public byte[] data  = new byte[512];	
+public class DmxPacket {
+	public byte[] data  = new byte[512];
+	private boolean beat;	
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -11,6 +12,14 @@ class DmxPacket {
 			sb.append(n).append(" ");
 		}
 		return sb.toString();
+	}
+
+	public void setBeat(boolean b) {
+		beat = b;
+	}
+
+	public boolean isBeat() {
+		return beat;
 	}
 	
 }

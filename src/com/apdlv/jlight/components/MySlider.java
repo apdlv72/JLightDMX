@@ -1,8 +1,9 @@
-package com.apdlv.test;
+package com.apdlv.jlight.components;
 
 import javax.swing.JSlider;
 
 @SuppressWarnings("serial")
+public
 class MySlider extends JSlider {
 	private String name;
 

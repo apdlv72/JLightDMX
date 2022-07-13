@@ -1,0 +1,201 @@
+package com.apdlv.jlight;
+
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static javax.swing.BorderFactory.createLineBorder;
+
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
+
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+
+import com.apdlv.jlight.components.SelfMaintainedBackground;
+import com.apdlv.jlight.components.SelfMaintainedForeground;
+import com.apdlv.jlight.controls.ChannelDebug;
+import com.apdlv.jlight.controls.ChannelTest;
+import com.apdlv.jlight.controls.FogMachine;
+import com.apdlv.jlight.controls.LaserHead;
+import com.apdlv.jlight.controls.MovingHead;
+import com.apdlv.jlight.controls.RGBSpotArray;
+import com.apdlv.jlight.controls.RGBWSpot;
+import com.apdlv.jlight.controls.RGBWSpotArray;
+import com.apdlv.jlight.controls.Settings;
+import com.apdlv.jlight.controls.SoundControl;
+import com.apdlv.jlight.dmx.ArtNetLib;
+import com.apdlv.jlight.dmx.DmxPacket;
+
+/**
+ * ArtNet Tester class
+ * 
+ * @author: Mirco Borella
+ */
+
+public class JLightDMX {
+
+	private static final int ADDR_RGB_SPOTS = 0;
+	private static final int ADDR_RGBW_SPOTS2 = 60-1;
+	private static final int ADDR_RGBW_SPOTS3 = 70-1;
+	
+	private static final int ADDR_FOGGER = 128; // channel 129
+	private static final int ADDR_LASER = 255;
+	private static final int ADDR_MOVING1 = 300-1; // channels 300 - 311
+	private static final int ADDR_MOVING2 = 320-1; // channel 320 - 331
+
+	/**
+	 * Main loop
+	 * 
+	 * @param args Arguments
+	 * @throws Exception if problems
+	 */
+	public static void main(String[] args) {
+
+		DmxPacket packet = new DmxPacket();
+
+		ArtNetLib artnet = new ArtNetLib("255.255.255.255");
+		JFrame frame = new JFrame();
+		LayoutManager layout = new GridLayout(4, 1);
+		layout = new FlowLayout();
+
+		frame.getContentPane().setLayout(layout);
+		
+		SoundControl sound = new SoundControl();
+		RGBWSpotArray spots1 = new RGBWSpotArray(ADDR_RGB_SPOTS, 200, 4);
+		FogMachine fogger = new FogMachine(ADDR_FOGGER);
+		RGBWSpot spots2 = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
+		RGBWSpot spots3 = new RGBWSpot(ADDR_RGBW_SPOTS3, "Master", "Red", "Green", "Blue", "White", "Flash", "Prgrm");
+		LaserHead lasers = new LaserHead(ADDR_LASER, 
+				"Mode", // 50 values/step 
+				"Pattern", // 10 values/step 
+				"X-Swap", 
+				"Y-Pos", 
+				"Speed" // Inverse - 255 is slowest 
+				,"???", "???"); 
+		MovingHead moving1 = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		//MovingHead moving2 = new MovingHead(ADDR_MOVING2, "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		ChannelDebug debug = new ChannelDebug();
+		ChannelTest channel = new ChannelTest();
+		Settings settings = new Settings(frame, frame.getContentPane(), debug, channel);
+
+		Border border = createLineBorder(WHITE);
+		sound.setBorder(border);
+		spots1.setBorder(border);
+		fogger.setBorder(border);
+		spots2.setBorder(border);
+		spots3.setBorder(border);
+		lasers.setBorder(border);
+		moving1.setBorder(border);
+		//moving2.setBorder(border);
+		settings.setBorder(border);
+		debug.setBorder(border);
+		channel.setBorder(border);
+
+		frame.add(settings);
+		frame.add(sound);
+		frame.add(spots1);
+		frame.add(fogger);
+		frame.add(spots2);
+		frame.add(spots3);
+		//frame.add(lasers);
+
+		JPanel movings = new JPanel();
+		movings.setLayout(new GridLayout(1, 2));
+		//movings.add(moving1);
+		//movings.add(moving2);
+		frame.add(movings);
+
+		frame.add(channel);
+		frame.add(debug);
+
+		setColors(frame.getContentPane());
+
+		frame.pack();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+
+		packet = new DmxPacket();
+
+		int fps = 40;
+		int millis = (int) Math.round(1000.0/fps);
+		
+		long loop = 0;
+		long lastSent = 0;
+		String last = "";
+		while (true) {
+			try {
+				sound.loop(loop, packet);
+				spots1.loop(loop, packet);
+				fogger.loop(loop, packet);
+				spots2.loop(loop, packet);
+				spots3.loop(loop, packet);
+				lasers.loop(loop, packet);
+				moving1.loop(loop, packet);
+				//moving2.loop(loop, packet);
+				settings.loop(loop, packet);
+				channel.loop(loop, packet);
+				debug.loop(loop, packet);
+
+				loop++;
+
+				long now = System.currentTimeMillis();
+				long next = lastSent + millis; 
+				long delay = Math.max(0, next - now);
+				//System.out.println("delay: " + delay);
+				Thread.sleep(delay);
+
+				lastSent = System.currentTimeMillis();
+				if (doSend) {
+					artnet.sendArtDmxPacket(packet.data, (byte) 0, (byte) 0, (byte) 0);
+				} else {
+					String line = packet.toString();
+					if (!line.equals(last)) {
+						System.out.println(loop + ": " + line);
+						last = line;
+					}
+					if (packet.isBeat()) {
+						System.out.println("main: beat");
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Exception in Main: " + e);
+			}
+		}
+	}
+
+	private static boolean doSend = false;
+
+	private static void setColors(Component c) {
+		if (c instanceof JCheckBox) {
+			JCheckBox cb = (JCheckBox) c;
+		}
+		try {
+			Font font = new Font("Monaco", Font.PLAIN, 20);
+			// c.setFont(font);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (!(c instanceof SelfMaintainedBackground)) {
+			c.setBackground(BLACK);
+		}
+		if (!(c instanceof SelfMaintainedForeground)) {
+			c.setForeground(WHITE);
+		}
+		if (c instanceof JPanel) {
+			JPanel p = (JPanel) c;
+			Component[] all = p.getComponents();
+			for (Component x : all) {
+				setColors(x);
+			}
+		}
+	}
+
+	public static void setSending(boolean doSend) {
+		JLightDMX.doSend = doSend;
+	}
+}

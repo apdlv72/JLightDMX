@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -11,8 +11,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class Debug extends JPanel implements DmxEffectInterface {
+public class ChannelDebug extends JPanel implements DmxControlInterface {
 	
 	private JLabel[] labels;
 
@@ -21,7 +23,7 @@ class Debug extends JPanel implements DmxEffectInterface {
 		return new Insets(8, 20, 8, 20);
 	}
 	
-	public Debug() {
+	public ChannelDebug() {
         Font font = new Font( "Monospaced", Font.PLAIN, 8 );
 		setLayout(new GridLayout(8, 1,  20,  20));
 		labels = new JLabel[8];

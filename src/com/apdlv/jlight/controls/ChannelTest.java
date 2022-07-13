@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static javax.swing.SwingConstants.VERTICAL;
 
@@ -10,8 +10,12 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.apdlv.jlight.components.LabeledPanel;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class ChannelTest extends JPanel implements DmxEffectInterface, ChangeListener {
+public class ChannelTest extends JPanel implements DmxControlInterface, ChangeListener {
 	
 	private JSlider valueSlider;
 	private JLabel addressLabel;

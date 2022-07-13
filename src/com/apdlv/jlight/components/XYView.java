@@ -1,20 +1,21 @@
-package com.apdlv.test;
+package com.apdlv.jlight.components;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class XYView extends JPanel implements MouseListener {
+@SuppressWarnings("serial")
+public class XYView extends JPanel implements MouseListener, MouseMotionListener {
 	
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		JFrame frame = new JFrame("XYTest");
-		
-		
+				
 		XYView view = new XYView(65535, 65535);
 		
 		frame.add(view);
@@ -23,14 +24,46 @@ public class XYView extends JPanel implements MouseListener {
 		frame.setVisible(true);
 		
 		for (long loop=0;;loop++) {			
-			animateTwoWheels(view, loop);
+			view.animateTwoWheels(loop);
 			sleep(1);
-			animateInterference(view, loop);
+			view.animateInterference(loop);
 			sleep(1);
 		}
 	}
+	
+	int stepX = 200;
+	int stepY = 300;
 
-	public static void animateInterference(XYView view, long loop) {
+	public void animateBounce(long loop) {
+		
+		XYView view = this;
+		int[] xy = view.getXY();		
+		int x = xy[0];
+		int y = xy[1];
+		
+		x += view.stepX;
+		y += view.stepY;
+		if (x>65536) {
+			x=65536;
+			view.stepX = -view.stepX;			
+		} else if (x<0) {
+			x = 0;
+			view.stepX = -view.stepX;			
+		}
+		
+		if (y>65536) {
+			y=65536;
+			view.stepY = -view.stepY;			
+		} else if (y<0) {
+			y = 0;
+			view.stepY = -view.stepY;			
+		}
+		
+		view.setXY(x, y);
+	}
+
+	public void animateInterference(long loop) {
+		XYView view = this;
 		int R = 65535/2;
 		int degOuter = (int) ((loop/2)%360);
 		int degInner = (int) ((loop/1)%360);
@@ -44,13 +77,14 @@ public class XYView extends JPanel implements MouseListener {
 		view.setXY(x, y);
 	}
 
-	public static void animateTwoWheels(XYView view, long loop) {
+	public void animateTwoWheels(long loop) {
+		XYView view = this;
 		int R = 65535/2;
-		int radOuter = 40;
-		int radInner = 90-radOuter;
+		int radOuter = 30;
+		int radInner = 95-radOuter;
 		
 		int degOuter = (int) ((loop/2)%360);
-		int degInner = (int) ((loop/1)%360);
+		int degInner = (int) -((3*loop)%360);
 		
 		double angOuter = deg2rad(degOuter);
 		double angInner = deg2rad(degInner);
@@ -91,6 +125,7 @@ public class XYView extends JPanel implements MouseListener {
 		this.rx = maxX/2;
 		this.ry = maxY/2;
 		addMouseListener(this);
+		addMouseMotionListener(this);
 	}
 	
 	@Override
@@ -106,7 +141,7 @@ public class XYView extends JPanel implements MouseListener {
 		int d = (int)Math.min(w, h);
 		
 		g.setColor(getBackground());
-		g.fillRoundRect(0, 0, d, d, 30, 30);
+		g.fillRect(0, 0, d, d);
 		g.setColor(getForeground());
 		g.drawRect(0, 0, d-1, d-1);
 		
@@ -122,20 +157,25 @@ public class XYView extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		Point p = e.getPoint();				
+		setPosition(p);
+	}
+
+	private void setPosition(Point p) {
+		double x = p.getX();
+		double y = p.getY();		
+		
+
 		Dimension s = getSize();
 		double w = s.getWidth();
 		double h = s.getHeight();
 		double dia = Math.min(w, h);
 		
-		Point p = e.getPoint();
-		double x = p.getX();
-		double y = p.getY();		
-		
 		this.rx = clamp(Math.round(maxX*x/dia), 0.0, maxX); 
 		this.ry = clamp(Math.round(maxY*y/dia), 0.0, maxY);
 		repaint();
 		
-		System.out.println("x: " + x + ", y: " + y + ", rx: " + rx + ", ry: " + ry);
+		//System.out.println("x: " + x + ", y: " + y + ", rx: " + rx + ", ry: " + ry);
 	}
 	
 	public void setXY(int x, int y) {
@@ -144,26 +184,27 @@ public class XYView extends JPanel implements MouseListener {
 		repaint();
 	}
 
+	public int[] getXY() {
+		return new int [] { round(this.rx), round(this.ry) };
+	}
+
 	private double clamp(long v, double mn, double mx) {
 		return v<mn ? mn : v>mx ? mx : v;
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
 	@Override
@@ -172,4 +213,23 @@ public class XYView extends JPanel implements MouseListener {
 		
 	}
 
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		//System.out.println("mouseDragged: " + e);
+		Point p = e.getPoint();				
+		setPosition(p);
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		//System.out.println("mouseMoved: " + e);
+	}
+
+	public void setIdlePosition() {
+		int x = maxX/2;
+		int y = maxY/2;
+		if (x!=rx || y!=ry) {
+			setXY(x, y);
+		}
+	}
 }

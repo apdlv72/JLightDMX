@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GRAY;
@@ -14,8 +14,14 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.apdlv.jlight.components.ColorSlider;
+import com.apdlv.jlight.components.LabeledPanel;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.components.XYView;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class MovingHead extends JPanel implements DmxEffectInterface, ActionListener {
+public class MovingHead extends JPanel implements DmxControlInterface, ActionListener {
 	
 	private int dmxAddr;
 	private MySlider[] sliders;
@@ -33,7 +39,7 @@ class MovingHead extends JPanel implements DmxEffectInterface, ActionListener {
 		
 		JPanel anims = new JPanel();
 		anims.setLayout(new GridLayout(6, 1));
-//		anims.add(newButton("Bounce"));
+		anims.add(newButton("Bounce"));
 		anims.add(newButton("Wheels"));
 		anims.add(newButton("Waves"));
 //		anims.add(newButton("Zigzag"));
@@ -41,42 +47,49 @@ class MovingHead extends JPanel implements DmxEffectInterface, ActionListener {
 		anims.add(newButton("Off"));
 		add(anims);
 		
-		this.position = new XYView(65535, 65535);
-		add(position);
+		//this.position = new XYView(65535, 65535);
+		//add(position);
 		
 		for (int i=0; i<sliders.length; i++) {
 			
 			int max = 255;
 			String name = channels[i];
 			switch (name) {
-			case "Vert":
-				continue;
-//				max = 65535;
-//				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
-//				break;
-			case "Horz":
-				continue;
-//				max = 65535;
-//				sliders[i] = new MySlider(name, HORIZONTAL, 0, max, 0);
-//				break;
-			case "Red":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(Color.RED.darker());
+			case "XPos":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, 65535, 0);
+				sliders[i].setBackground(GRAY);
 				break;
-			case "Green":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(Color.GREEN.darker());
+			case "YPos":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, 65535, 0);
+				sliders[i].setBackground(GRAY);
 				break;
-			case "Blue":
+			case "Speed":
 				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(BLUE.darker());
+				sliders[i].setBackground(GRAY);
 				break;
-			case "White":
+			case "Color":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(GRAY);
+				break;
+			case "Pattern":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(GRAY);
+				break;
+			case "Strobe":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(GRAY);
+				break;
+			case "Light":
+				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(GRAY);
+				break;
+			case "Progr":
 				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
 				sliders[i].setBackground(GRAY);
 				break;
 			default:
-				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				//sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				//sliders[i].setBackground(GRAY);
 				break;
 			}
 			
@@ -91,22 +104,33 @@ class MovingHead extends JPanel implements DmxEffectInterface, ActionListener {
 		return b;
 	}
 	
+	boolean wasOff = false;
+	
 	@Override
 	public void loop(long count, DmxPacket packet) {
 		if (null!=this.effect) {
+			boolean isOff = false;
 			switch (this.effect) {
+			case "bounce":
+				position.animateBounce(count);
+				break;
 			case "wheels":
-				XYView.animateTwoWheels(position, count);
+				position.animateTwoWheels(count);
 				break;
 			case "waves":
-				XYView.animateInterference(position, count);
+				position.animateInterference(count);
 				break;
 			case "off":
-				if (sliders[0].getValue()>0) {
-					sliders[0].setValue(0);
+				if (!wasOff) {
+					position.setIdlePosition();
+					if (sliders[0].getValue()>0) {
+						sliders[0].setValue(0);
+					}
 				}
+				isOff = true;
 				break;
 			}
+			wasOff = isOff;
 		}
 
 		int addr = dmxAddr;
@@ -120,7 +144,7 @@ class MovingHead extends JPanel implements DmxEffectInterface, ActionListener {
 				packet.data[addr + 0] = hi;
 				packet.data[addr + 1] = lo;
 			} else {
-				packet.data[dmxAddr+i] = lo;
+				packet.data[addr] = lo;
 			}			
 			addr += _16bit ? 2 : 1;
 		}

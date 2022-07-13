@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.dmx;
 
 
 import java.net.DatagramPacket;

@@ -1,9 +1,9 @@
-package com.apdlv.test;
+package com.apdlv.jlight.components;
 
 import javax.swing.JSlider;
 import javax.swing.plaf.metal.MetalSliderUI;
 
-class MyUi extends MetalSliderUI {
+public class MyUi extends MetalSliderUI {
 	protected void scrollDueToClickInTrack(int direction) {
 		int value = slider.getValue();
 

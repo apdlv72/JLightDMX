@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
@@ -12,8 +12,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
+import com.apdlv.jlight.components.ColorSlider;
+import com.apdlv.jlight.components.LabeledPanel;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.components.MyUi;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class RGBWSpot extends JPanel implements DmxEffectInterface {
+public class RGBWSpot extends JPanel implements DmxControlInterface {
 	
 	private int dmxAddr;
 	private JSlider[] sliders;

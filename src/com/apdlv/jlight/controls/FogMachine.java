@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static javax.swing.SwingConstants.VERTICAL;
 
@@ -15,29 +15,36 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.apdlv.jlight.components.ColorButton;
+import com.apdlv.jlight.components.LabeledPanel;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class FogMachine extends JPanel implements DmxEffectInterface, MouseListener, ChangeListener, ActionListener {
+public class FogMachine extends JPanel implements DmxControlInterface, MouseListener, ChangeListener, ActionListener {
 	
 	private int dmxAddr;
+	private JButton powerButton;
 	private JSlider powerSlider;
+	private JButton fogButton;
 	private JSlider fogSlider;
 	private JSlider laserSlider;
-	private JButton fogButton;
 	private JButton laserButton;
-	private JButton powerLabel;
-
+	private JSlider speedSlider;
+	private JButton speedButton;
+	
 	@Override
 	public Insets getInsets() {
 		return new Insets(10, 30, 10, 30);
 	}
 	
-	public FogMachine(int dmxAddr) {
-		this.dmxAddr = dmxAddr;
+	public FogMachine(int dmxChannel) {
+		this.dmxAddr = dmxChannel;
 		
 		int orient = VERTICAL; 
 		
-		powerLabel = new JButton("Power");
-		powerLabel.addActionListener(this);
+		powerButton = new JButton("Power");
+		powerButton.addActionListener(this);
 		powerSlider = new MySlider("Power", orient, 0, 1, 0);
 		powerSlider.addChangeListener(this);
 		
@@ -47,26 +54,33 @@ class FogMachine extends JPanel implements DmxEffectInterface, MouseListener, Ch
 
 		laserButton = new ColorButton("Laser");
 		laserButton.addMouseListener(this);
-		laserSlider = new MySlider("Laser", orient, 0, 25, 0);
+		laserSlider = new MySlider("Laser", orient, 0, 255, 0);
 		
+		speedButton = new ColorButton("Speed");
+		speedButton.addMouseListener(this);
+		speedSlider = new MySlider("Speed", orient, 0, 255, 0);
+
 		fogButton.setEnabled(false);
 		fogSlider.setEnabled(false);
 		
 		laserButton.setForeground(Color.GREEN);
-		add(new LabeledPanel(powerLabel, powerSlider));		
+		add(new LabeledPanel(powerButton, powerSlider));		
 		add(new LabeledPanel(fogButton, fogSlider));		
 		add(new LabeledPanel(laserButton, laserSlider));		
+		add(new LabeledPanel(speedButton, speedSlider));		
 	}
 
 	@Override
 	public void loop(long count, DmxPacket packet) {
 		int power = this.powerSlider.getValue();
 		int fog   = this.fogSlider.getValue();
-		int laser = 10 * this.laserSlider.getValue();		
+		int laser = this.laserSlider.getValue();		
+		int speed = this.speedSlider.getValue();		
 		
 		packet.data[dmxAddr+0] = 0==power ? (byte)0x00 : (byte)0xff;
 		packet.data[dmxAddr+1] = 0==fog   ? (byte)0x00 : (byte)0xff;
 		packet.data[dmxAddr+2] = (byte) (laser & 0xff);		
+		packet.data[dmxAddr+3] = (byte) (speed & 0xff);		
 	}
 
 	@Override
@@ -110,7 +124,7 @@ class FogMachine extends JPanel implements DmxEffectInterface, MouseListener, Ch
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
-		if (s==powerLabel) {
+		if (s==powerButton) {
 			powerSlider.setValue(powerSlider.getMaximum()-powerSlider.getValue());
 		}
 	}	

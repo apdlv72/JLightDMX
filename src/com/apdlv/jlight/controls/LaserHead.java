@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static javax.swing.SwingConstants.VERTICAL;
 
@@ -8,11 +8,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
+import com.apdlv.jlight.components.LabeledPanel;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class LaserHead extends JPanel implements DmxEffectInterface {
+public class LaserHead extends JPanel implements DmxControlInterface {
 	
 	private int dmxAddr;
 	private JSlider[] sliders;
+	private String[] channels;
 	
 	@Override
 	public Insets getInsets() {
@@ -21,6 +26,7 @@ class LaserHead extends JPanel implements DmxEffectInterface {
 	
 	public LaserHead(int dmxAddr, String ... channels) {
 		this.dmxAddr = dmxAddr;
+		this.channels = channels;
 		this.sliders = new JSlider[channels.length];
 		
 		for (int i=0; i<sliders.length; i++) {
@@ -34,7 +40,10 @@ class LaserHead extends JPanel implements DmxEffectInterface {
 	@Override
 	public void loop(long count, DmxPacket packet) {
 		for (int i=0; i<sliders.length-2; i++) {
-			packet.data[dmxAddr+i] = (byte) (sliders[i].getValue() & 0xff);
+			int v = sliders[i].getValue();
+			if (i==4) v=255-v;
+			byte value = (byte) (v & 0xff);
+			packet.data[dmxAddr+i] = value;
 		}
 	}
 }

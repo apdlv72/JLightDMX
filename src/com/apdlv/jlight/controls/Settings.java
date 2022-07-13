@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.LIGHT_GRAY;
@@ -14,6 +14,13 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,8 +28,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.apdlv.jlight.JLightDMX;
+import com.apdlv.jlight.components.SelfMaintainedBackground;
+import com.apdlv.jlight.components.SelfMaintainedForeground;
+import com.apdlv.jlight.dmx.DmxPacket;
+
 @SuppressWarnings("serial")
-class Settings extends JPanel implements DmxEffectInterface, ActionListener {
+public class Settings extends JPanel implements DmxControlInterface, ActionListener {
 	
 	private JButton dark;
 	private JButton light;
@@ -32,7 +44,7 @@ class Settings extends JPanel implements DmxEffectInterface, ActionListener {
 	private JCheckBox full;
 	private JFrame frame;
 	private JCheckBox debug;
-	private Debug debugPanel;
+	private ChannelDebug debugPanel;
 	private JCheckBox send;
 	long lastUpdate = -1;
 	long lastFrames = -1;
@@ -47,7 +59,7 @@ class Settings extends JPanel implements DmxEffectInterface, ActionListener {
 		return new Insets(8, 20, 8, 20);
 	}
 	
-	public Settings(JFrame frame, Container container, Debug debugPanel, ChannelTest channelTest) {
+	public Settings(JFrame frame, Container container, ChannelDebug debugPanel, ChannelTest channelTest) {
 		this.frame = frame;
 		this.container = container; 
 		this.debugPanel = debugPanel;
@@ -72,6 +84,28 @@ class Settings extends JPanel implements DmxEffectInterface, ActionListener {
 		add(debug);
 		add(send);
 		add(info = new JLabel("?"));		
+		
+		
+		Enumeration<NetworkInterface> ifs;
+		try {
+			ifs = NetworkInterface.getNetworkInterfaces();
+			while (ifs.hasMoreElements() ) {
+				NetworkInterface i = ifs.nextElement();
+				if (i.isLoopback() || !i.isUp()) {
+					continue;
+				}
+				List<InterfaceAddress> list = i.getInterfaceAddresses();
+				for (InterfaceAddress a : list) {
+					InetAddress addr = a.getAddress();
+					if (addr instanceof Inet4Address) {
+						send.setText(addr.toString().replace("/", ""));
+						break;
+					}
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 		
 		super.setBackground(YELLOW);							
 	}
@@ -123,7 +157,7 @@ class Settings extends JPanel implements DmxEffectInterface, ActionListener {
 		} else if (send==s) {
 			boolean selected = send.isSelected();
 			info.setVisible(selected);
-			ArtNetGui.doSend = selected;			
+			JLightDMX.setSending(selected);			
 			Color c = selected ? bg : YELLOW;
 			super.setBackground(c);					
 		}

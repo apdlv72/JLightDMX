@@ -1,4 +1,4 @@
-package com.apdlv.test;
+package com.apdlv.jlight.controls;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.DARK_GRAY;
@@ -6,9 +6,7 @@ import static java.awt.Color.GREEN;
 import static java.awt.Color.LIGHT_GRAY;
 import static java.awt.Color.RED;
 import static javax.swing.SwingConstants.HORIZONTAL;
-import static javax.swing.SwingConstants.VERTICAL;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -28,203 +26,28 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-@SuppressWarnings("serial")
-class RGBSliders extends JPanel implements ChangeListener {
-	
-	JSlider r;
-	JSlider g;
-	JSlider b;
-	ChangeListener listener;
-	private JCheckBox check;
+import com.apdlv.jlight.components.ColorButton;
+import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.components.MyUi;
+import com.apdlv.jlight.dmx.DmxPacket;
 
-	public RGBSliders(String name) {
-
-		JPanel sliderPanel = new JPanel();
-
-		r = new ColorSlider("Red",   VERTICAL, 0, 255, 0);
-		g = new ColorSlider("Green", VERTICAL, 0, 255, 0);
-		b = new ColorSlider("Blue",  VERTICAL, 0, 255, 0);
-		r.setBackground(RED.darker());
-		g.setBackground(GREEN.darker());
-		b.setBackground(BLUE.darker());
-
-		sliderPanel.add(r);
-		sliderPanel.add(g);
-		sliderPanel.add(b);
-
-		r.addChangeListener(this);
-		g.addChangeListener(this);
-		b.addChangeListener(this);
-
-		setLayout(new BorderLayout());
-		check = new JCheckBox(name);
-		check.addChangeListener(this);
-
-		add(check, BorderLayout.NORTH);
-		add(sliderPanel, BorderLayout.CENTER);
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if (null != listener) {
-			listener.stateChanged(e);
-		}
-	}
-
-	public void addChangeListener(ChangeListener l) {
-		listener = l;
-	}
-
-	public int getRGB() {
-		return (r.getValue() << 16) | (g.getValue() << 8) | b.getValue();
-	}
-
-	public boolean isSelected() {
-		return check.isSelected();
-	}
-
-	public void setRGB(int rgb) {
-		r.setValue((rgb >> 16) & 0xff);
-		g.setValue((rgb >> 8) & 0xff);
-		b.setValue((rgb >> 0) & 0xff);
-	}
-
-	public void setSelected(boolean sel) {
-		check.setSelected(sel);
-	}
-
-	public void darker() {
-		r.setValue(cap(8*r.getValue()/10, 0, 255));		
-		g.setValue(cap(8*g.getValue()/10, 0, 255));		
-		b.setValue(cap(8*b.getValue()/10, 0, 255));		
-	}
-
-	public void lighter() {
-		r.setValue(r.getValue()<10 ? 10 : cap(12*r.getValue()/10, 0, 255));		
-		g.setValue(g.getValue()<10 ? 10 : cap(12*g.getValue()/10, 0, 255));		
-		b.setValue(b.getValue()<10 ? 10 : cap(12*b.getValue()/10, 0, 255));		
-	}
-
-	private int cap(int i, int min, int max) {
-		return i<min ? min : i>max ? max : i;
-	}
-
-	public boolean isDark() {
-		return r.getValue()<1 && g.getValue()<1 && b.getValue()<1;
-	}
-}
-
-@SuppressWarnings("serial")
-public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInterface {
+public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlInterface {
 
 	private int dmxAddr;
 	private int strobeAddr;
 	Controls controls;
-	RGBSliders master;
-	RGBSliders sliders[];
+	RGBWSliders master;
+	RGBWSliders sliders[];
 	int index;
-	private Controls2 controls2;
+//	private Controls2 controls2;
 
 	@Override
 	public Insets getInsets() {
 		return new Insets(0, 10, 0, 10);
 	}
 	
-
-	class Controls2 extends JPanel implements ActionListener {
-		private final Color OFF = new Color(0, 0, 0);
-		private final Color LOW = new Color(10, 10, 10);
-		private final Color WARM = new Color(255, 180, 107);
-		private final Color NORM = new Color(255, 209, 163);
-		private final Color COLD = new Color(254, 249, 255);
-		private JButton cold;
-		private JButton norm;
-		private JButton warm;
-		private JButton red;
-		private JButton blue;
-		private JButton green;
-		private JButton low;
-		private JButton off;
-		private JButton plus, minus;
-
-		public Controls2() {
-			setLayout(new GridLayout(7,1));
-			//add(new JLabel("Bar"));
-			cold = colorButton("Cold", COLD);
-			//norm = colorButton("Norm", NORM);
-			warm = colorButton("Warm", WARM);
-			red  = colorButton("Red", RED);
-			//green = colorButton("Green", GREEN);			
-			blue = colorButton("Blue", BLUE);			
-			low = colorButton("Low", LIGHT_GRAY);			
-			off = colorButton("Off", DARK_GRAY);
-			JPanel p = new JPanel();
-			p.add(minus = newJButton("-", Color.WHITE, false));			
-			p.add(plus  = newJButton("+", Color.WHITE, false));
-			//p.setBorder(BorderFactory.createLineBorder(RED));
-			add(p);
-		}
-
-		private JButton colorButton(String name, Color color) {
-			ColorButton butt = new ColorButton(name);
-			butt.addActionListener(this);
-			butt.setForeground(color);
-			add(butt);
-			return butt;
-		}
-
-		private JButton newJButton(String name, Color color, boolean doAdd) {
-			ColorButton butt = new ColorButton(name);
-			butt.addActionListener(this);
-			butt.setForeground(color);
-			if (doAdd) {
-				add(butt);
-			}
-			return butt;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			Object s = e.getSource();
-			// https://andi-siess.de/rgb-to-color-temperature/
-			if (s==cold) {
-				setColor(COLD);
-			} else if (s==norm) {
-				setColor(NORM);
-			} else if (s==warm) {
-				setColor(WARM);
-			} else if (s==red) {
-				setColor(RED);
-			} else if (s==green) {
-				setColor(GREEN);
-			} else if (s==blue) {
-				setColor(BLUE);
-			} else if (s==low) {
-				setColor(LOW);
-			} else if (s==off) {
-				setColor(OFF);
-			} else if (s==plus) {
-				int len = sliders.length;
-				sliders[len-1].lighter();
-			} else if (s==minus) {
-				int len = sliders.length;
-				sliders[len-1].darker();
-			}
-		}
-
-		private void setColor(Color c) {
-			setColor(c.getRed(), c.getGreen(), c.getBlue());
-		}
-
-		private void setColor(int r, int g, int b) {
-			int len = sliders.length;
-			int color = (r<<16) | (g<<8) | b;
-			sliders[len-1].setRGB(color);
-		}
-	}
-
 	class Controls extends JPanel implements ChangeListener, MouseListener {
-		JCheckBox all;
+//		JCheckBox all;
 		JCheckBox chase;
 		JCheckBox reverse;
 		JCheckBox rand;
@@ -251,7 +74,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 			strobe.setUI(new MyUi());
 			strobe.setValue(0);
 			add(chase = new JCheckBox("Chase"));
-			add(all = new JCheckBox("All"));
+//			add(all = new JCheckBox("All"));
 			add(reverse = new JCheckBox("Reverse"));
 			add(rand = new JCheckBox("Random"));
 			add(fade = new JCheckBox("Fade"));
@@ -259,7 +82,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 			speed.addChangeListener(this);
 			chase.addChangeListener(this);
 			chaseWasSelected = false;
-			all.addChangeListener(this);
+//			all.addChangeListener(this);
 			rand.addChangeListener(this);
 			reverse.addChangeListener(this);
 			fade.addChangeListener(this);
@@ -277,9 +100,9 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 			Object s = e.getSource();
 			if (chase == s) {
 				if (chaseWasSelected && !chase.isSelected()) {
-					for (int i=0; i<sliders.length-1; i++) {
-						RGBSliders sl = sliders[i];
-						sl.setRGB(0);
+					for (int i=0; i<sliders.length; i++) {
+						RGBWSliders sl = sliders[i];
+						sl.setWRGB(0);
 					}
 				}
 				chaseWasSelected = chase.isSelected();
@@ -333,37 +156,37 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 
 	int rainbow[]; 
 
-	public RGBSpotArray(int dmxAddr, int strobeAddr, int count) {
+	public RGBWSpotArray(int dmxAddr, int strobeAddr, int count) {
 
 		this.dmxAddr = dmxAddr;
 		this.strobeAddr = strobeAddr;
 		
-		rainbow = computeRainbow(100);
+		rainbow = computeRainbow(256);
 		
 		setLayout(new FlowLayout());
 		setBorder(BorderFactory.createLineBorder(Color.black));
 		
-		sliders = new RGBSliders[count];
-		master = new RGBSliders("Master");
+		sliders = new RGBWSliders[count];
+		master = new RGBWSliders("Master");
 		master.addChangeListener(this);		
 		controls = new Controls();
-		controls2 = new Controls2();
+//		controls2 = new Controls2();
 		
 		add(controls);
 		add(master);
 		add(new JLabel("→"));
 		for (int i = 0; i < count; i++) {
-			sliders[i] = new RGBSliders("" + (i + 1));
+			sliders[i] = new RGBWSliders("" + (i + 1));
 			add(sliders[i]);
 		}
-		add(controls2);
+//		add(controls2);
 	}
 
 	public void loop(long count, DmxPacket packet) {
 		int len = sliders.length; // sliders.length;
-		if (!controls.all.isSelected()) {
-			len -= 1;
-		}
+//		if (!controls.all.isSelected()) {
+//			len -= 1;
+//		}
 		int speed = controls.speed.getMinimum()+(controls.speed.getMaximum()-controls.speed.getValue());
 		
 		if (controls.chase.isSelected()) {
@@ -392,13 +215,13 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 			int i0 = (index - 1 + len) % len;
 		
 			for (int i = 0; i < len; i++) {
-				RGBSliders s = sliders[i];
+				RGBWSliders s = sliders[i];
 				if (i == index) {
-					s.setRGB(color);
+					s.setWRGB(color);
 				} else if (fade && (i0 == i || i2 == i)) {
-					s.setRGB(faded);
+					s.setWRGB(faded);
 				} else {
-					s.setRGB(0);
+					s.setWRGB(0);
 				}
 				s.repaint();
 			}
@@ -467,7 +290,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 		if (src instanceof JCheckBox) {
 			JCheckBox c = (JCheckBox) src;
 			boolean sel = c.isSelected();
-			for (int i=0; i<sliders.length-1; i++) {
+			for (int i=0; i<sliders.length; i++) {
 				sliders[i].setSelected(sel);
 			}
 			return;
@@ -500,9 +323,9 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxEffectInt
 		if (setColor) {
 			int rgb = master.getRGB();				
 			for (int i=0; i<sliders.length; i++) {
-				RGBSliders s = sliders[i];
+				RGBWSliders s = sliders[i];
 				if (s.isSelected()) {
-					s.setRGB(rgb);
+					s.setWRGB(rgb);
 				}
 			}
 		}
