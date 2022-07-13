@@ -13,6 +13,8 @@ import java.awt.LayoutManager;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 
 import com.apdlv.jlight.components.SelfMaintainedBackground;
@@ -57,6 +59,15 @@ public class JLightDMX {
 	 */
 	public static void main(String[] args) {
 
+		String name = UIManager.getCrossPlatformLookAndFeelClassName();
+		try {
+			UIManager.setLookAndFeel(name);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		DmxPacket packet = new DmxPacket();
 
 		ArtNetLib artnet = new ArtNetLib("255.255.255.255");
