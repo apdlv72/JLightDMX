@@ -99,26 +99,15 @@ class SoundThread extends Thread {
 public class SoundControl extends JPanel implements ChangeListener, DmxControlInterface {
 
 	private BeatDetector detector;
+	private JSlider volume;
+	private JSlider treshold;
 	private JSlider duration;
-	private JSlider threshold;
 	private JLabel button;
 	private AudioBuffer buffer;
 	private SoundThread thread;
 	
-	public static void main(String[] args) {
-		SoundControl test = new SoundControl();
-		
-		JFrame frame = new JFrame();
-		frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		frame.add(test);		
-		frame.pack();
-		frame.setVisible(true);
-		frame.setSize(400, 400);
-
-		test.go();
-	}
-
-	private void go() {
+	@SuppressWarnings("unused")
+	private void test() {
 		long count = 0;
 		DmxPacket packet = new DmxPacket();
 		for (;;) {
@@ -142,20 +131,25 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 	    JPanel panel = new JPanel();
 	    panel.setLayout(new FlowLayout());	    
 	    
-		duration  = new MySlider("Dur", VERTICAL, 0, 100, 50);
-		threshold = new MySlider("Vol", VERTICAL, 0, 100, 15);
+		volume   = new MySlider("Vol", VERTICAL, 0, 100, 100);
+		treshold = new MySlider("Mul", VERTICAL, 0, 100, 15);
+		duration = new MySlider("Dur", VERTICAL, 0, 100, 50);
 	    detector = new BeatDetector(
 	    		/*retentionDuration 5.0f */ 
 	    		0.1f*duration.getValue(), 
 	    		/*threshold  1.5f */ 
-	    		0.1f*threshold.getValue());
+	    		0.1f*treshold.getValue());
+	    detector.setVolume(1.0f);
 		
+		volume.addChangeListener(this);
 		duration.addChangeListener(this);
-		threshold.addChangeListener(this);
+		treshold.addChangeListener(this);
 		
-		JButton vol = new JButton("Vol");
-		panel.add(new LabeledPanel(vol, threshold));
-		JButton dur = new JButton("Dur");
+		JLabel vol = new JLabel("Vol");
+		panel.add(new LabeledPanel(vol, volume));
+		JLabel trs = new JLabel("Tres");
+		panel.add(new LabeledPanel(trs, treshold));
+		JLabel dur = new JLabel("Dur");
 		dur.setEnabled(false);
 		panel.add(new LabeledPanel(dur, duration));
 		
@@ -191,13 +185,17 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object src = e.getSource();
-		if (src == duration) {
+		if (src == volume) {
+			float v = 0.01f * volume.getValue();
+			//System.out.println("SoundControl: volume=" + v);
+			detector.setVolume(v);
+		} else if (src == duration) {
 			float v = 0.1f * duration.getValue();
-			System.out.println("SoundControl: duration=" + v);
+			//System.out.println("SoundControl: duration=" + v);
 			detector.setDuration(v);
-		} else if (src == threshold) {
-			float v = 0.1f * threshold.getValue();
-			System.out.println("SoundControl: threshold=" + v);
+		} else if (src == treshold) {
+			float v = 0.1f * treshold.getValue();
+			//System.out.println("SoundControl: threshold=" + v);
 			detector.setThreshold(v);
 		}
 		

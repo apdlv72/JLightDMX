@@ -267,16 +267,17 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			byte g = (byte) ((rgb >>  8) & 0xff);
 			byte b = (byte) ((rgb >>  0) & 0xff);
 			
-			int index = dmxAddr + 7*i;
+			int index = dmxAddr + 8*i;
 			//System.err.println("Slider " + i + ": index=" + index);
 			
-			packet.data[index+0] = (byte)0xff; // master
+			packet.data[index+0] = (byte)0xff; // ch1: total dimming
 			packet.data[index+1] = r; 
 			packet.data[index+2] = g; 
 			packet.data[index+3] = b; 
 			packet.data[index+4] = w;
-			packet.data[index+5] = 0; // program: unused
-			packet.data[index+6] = 0; // flash: unused 
+			packet.data[index+5] = 0; // ch6: strobe: unused
+			packet.data[index+6] = 0; // ch7: fade/sound mode: unused 
+			packet.data[index+7] = 0; // speed for ch7: unused 
 		}
 		if (strobeAddr>-1) {
 			packet.data[strobeAddr-1] = (byte) (controls.strobe.getValue() & 0xff);
