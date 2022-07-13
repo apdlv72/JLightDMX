@@ -8,7 +8,7 @@ import ddf.minim.AudioBuffer;
 public final class BeatDetector {
 
     private TimedQueue neighborLoudnesses;
-    private float significanceThreshold;
+    private volatile float significanceThreshold;
     
     // Additions for visualization.
     float currentLoudness;
@@ -20,14 +20,25 @@ public final class BeatDetector {
         significanceThreshold = threshold;
     }
     
-    public boolean processBuffer(AudioBuffer buffer) {
+    public boolean processBufferAvg(AudioBuffer buffer, StringBuilder sb) {
         currentLoudness = buffer.level();
+        
         averageLoudness = average(neighborLoudnesses);
         beatLoudness = significanceThreshold * averageLoudness;
 
         neighborLoudnesses.add(currentLoudness);
 
-        return currentLoudness >= beatLoudness;
+        boolean rtv = currentLoudness >= beatLoudness;
+
+        String s = String.format("cu:%3.1f av:%3.1f be:%3.1f %d", 
+        		currentLoudness, averageLoudness, beatLoudness, rtv ? 1 : 0);
+        if (s.length()>27) {
+        	//System.err.println(s.length());
+        	s = s.substring(0, 27);
+        }
+        sb.append(s);
+        
+        return rtv;
     }
 
     private float average(TimedQueue queue) {

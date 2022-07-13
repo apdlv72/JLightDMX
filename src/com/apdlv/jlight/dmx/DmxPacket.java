@@ -2,7 +2,8 @@ package com.apdlv.jlight.dmx;
 
 public class DmxPacket {
 	public byte[] data  = new byte[512];
-	private boolean beat;	
+	private boolean beat;
+	private long loopCount;	
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -21,5 +22,12 @@ public class DmxPacket {
 	public boolean isBeat() {
 		return beat;
 	}
-	
+
+	public void setLoopCount(long loopCount) {
+		this.loopCount = loopCount;
+	}
+
+	public long getLoopCount() {
+		return loopCount;
+	}	
 }

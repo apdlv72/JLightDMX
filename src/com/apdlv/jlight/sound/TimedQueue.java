@@ -11,7 +11,7 @@ final class TimedQueue {
 
     private List<Float> values = new ArrayList<Float>();
     private List<Integer> timeStamps = new ArrayList<Integer>();
-    private float retentionDuration; // in seconds
+    private volatile float retentionDuration; // in seconds
 
     private int startOfRelevantHistory() {
         if (timeStamps.isEmpty()) { return -1; }

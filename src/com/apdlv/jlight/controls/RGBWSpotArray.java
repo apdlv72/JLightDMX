@@ -1,18 +1,11 @@
 package com.apdlv.jlight.controls;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.DARK_GRAY;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.LIGHT_GRAY;
-import static java.awt.Color.RED;
 import static javax.swing.SwingConstants.HORIZONTAL;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Random;
@@ -26,11 +19,11 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.apdlv.jlight.components.ColorButton;
 import com.apdlv.jlight.components.MySlider;
 import com.apdlv.jlight.components.MyUi;
 import com.apdlv.jlight.dmx.DmxPacket;
 
+@SuppressWarnings("serial")
 public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlInterface {
 
 	private int dmxAddr;
@@ -47,7 +40,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	}
 	
 	class Controls extends JPanel implements ChangeListener, MouseListener {
-//		JCheckBox all;
+		JCheckBox sound;
 		JCheckBox chase;
 		JCheckBox reverse;
 		JCheckBox rand;
@@ -74,7 +67,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			strobe.setUI(new MyUi());
 			strobe.setValue(0);
 			add(chase = new JCheckBox("Chase"));
-//			add(all = new JCheckBox("All"));
+			add(sound = new JCheckBox("Sound"));
 			add(reverse = new JCheckBox("Reverse"));
 			add(rand = new JCheckBox("Random"));
 			add(fade = new JCheckBox("Fade"));
@@ -181,9 +174,47 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		}
 //		add(controls2);
 	}
+	
+	Random rand = new Random();
+	
+	int colors[] = {
+			0b0001, 0b0010, 0b0100, 0b1000, // r g b w
+			0b0011, 0b0110, 0b0101, // rg, gb, rb 
+			0b1001, 0b1010, 0b1100, // wr wg wb
+			0b0111, // rgb
+	};
+	
+	int lastIndex = -1;
 
 	public void loop(long count, DmxPacket packet) {
 		int len = sliders.length; // sliders.length;
+		
+		if (packet.isBeat()) {
+			if (controls.sound.isSelected()) {
+				int index = rand.nextInt(colors.length);
+				while (index == lastIndex) {
+					index = rand.nextInt(colors.length);
+				}
+				lastIndex = index;
+				
+				int dice = colors[index];
+				int w = (1 & dice)>0 ? 255 : 0;
+				int r = (2 & dice)>0 ? 255 : 0;
+				int g = (4 & dice)>0 ? 255 : 0;
+				int b = (8 & dice)>0 ? 255 : 0;				
+				int wrgb = (w << 24) | (r << 16) | (g << 8) | b;				
+				//System.out.println("BOOM dice=" + dice + " wrgb=" + wrgb);				
+				master.setWRGB(wrgb);
+				
+				if (!controls.chase.isSelected()) {
+					for (int i=sliders.length-1; i>0; i--) {
+						sliders[i].setWRGB(sliders[i-1].getWRGB());
+					}
+					sliders[0].setWRGB(master.getWRGB());
+				}				
+			}
+		}
+		
 //		if (!controls.all.isSelected()) {
 //			len -= 1;
 //		}
@@ -191,7 +222,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		
 		if (controls.chase.isSelected()) {
 		
-			int color = master.getRGB();
+			int color = master.getWRGB();
 			if (controls.rand.isSelected()) {
 				if (randomColor<0 || rnd.nextInt(5)==0) {
 					randomColor = createRandomColor(count);
@@ -228,14 +259,24 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		}
 		
 		for (int i=0; i<sliders.length; i++) {
-			int rgb = sliders[i].getRGB();
+			
+			int rgb = sliders[i].getWRGB();
+			
+			byte w = (byte) ((rgb >> 24) & 0xff);
 			byte r = (byte) ((rgb >> 16) & 0xff);
 			byte g = (byte) ((rgb >>  8) & 0xff);
 			byte b = (byte) ((rgb >>  0) & 0xff);
-			int index = dmxAddr+3*i+0;
-			packet.data[index+0] = r; 
-			packet.data[index+1] = g; 
-			packet.data[index+2] = b; 
+			
+			int index = dmxAddr + 7*i;
+			//System.err.println("Slider " + i + ": index=" + index);
+			
+			packet.data[index+0] = (byte)0xff; // master
+			packet.data[index+1] = r; 
+			packet.data[index+2] = g; 
+			packet.data[index+3] = b; 
+			packet.data[index+4] = w;
+			packet.data[index+5] = 0; // program: unused
+			packet.data[index+6] = 0; // flash: unused 
 		}
 		if (strobeAddr>-1) {
 			packet.data[strobeAddr-1] = (byte) (controls.strobe.getValue() & 0xff);
@@ -302,6 +343,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			if (toggle && master.r.getValue()>0) {
 				master.g.setValue(0);
 				master.b.setValue(0);				
+				master.w.setValue(0);				
 			}
 			setColor = true;
 		}
@@ -309,6 +351,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			if (toggle) {
 				master.r.setValue(0);
 				master.b.setValue(0);
+				master.w.setValue(0);				
 			}
 			setColor = true;
 		}
@@ -316,12 +359,21 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			if (toggle) {
 				master.r.setValue(0);
 				master.g.setValue(0);
+				master.w.setValue(0);				
+			}
+			setColor = true;
+		}
+		if (src==master.w && master.w.getValue()>0) {
+			if (toggle) {
+				master.r.setValue(0);
+				master.g.setValue(0);
+				master.b.setValue(0);				
 			}
 			setColor = true;
 		}
 
 		if (setColor) {
-			int rgb = master.getRGB();				
+			int rgb = master.getWRGB();				
 			for (int i=0; i<sliders.length; i++) {
 				RGBWSliders s = sliders[i];
 				if (s.isSelected()) {

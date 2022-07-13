@@ -19,6 +19,7 @@ import com.apdlv.jlight.components.SelfMaintainedBackground;
 import com.apdlv.jlight.components.SelfMaintainedForeground;
 import com.apdlv.jlight.controls.ChannelDebug;
 import com.apdlv.jlight.controls.ChannelTest;
+import com.apdlv.jlight.controls.DmxControlInterface;
 import com.apdlv.jlight.controls.FogMachine;
 import com.apdlv.jlight.controls.LaserHead;
 import com.apdlv.jlight.controls.MovingHead;
@@ -38,9 +39,10 @@ import com.apdlv.jlight.dmx.DmxPacket;
 
 public class JLightDMX {
 
-	private static final int ADDR_RGB_SPOTS = 0;
+	//private static final int ADDR_RGB_SPOTS = 0;
+	private static final int ADDR_RGBW_SPOTS = 64;
 	private static final int ADDR_RGBW_SPOTS2 = 60-1;
-	private static final int ADDR_RGBW_SPOTS3 = 70-1;
+	//private static final int ADDR_RGBW_SPOTS3 = 70-1;
 	
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_LASER = 255;
@@ -65,10 +67,10 @@ public class JLightDMX {
 		frame.getContentPane().setLayout(layout);
 		
 		SoundControl sound = new SoundControl();
-		RGBWSpotArray spots1 = new RGBWSpotArray(ADDR_RGB_SPOTS, 200, 4);
+		RGBWSpotArray spots1 = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
-		RGBWSpot spots2 = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
-		RGBWSpot spots3 = new RGBWSpot(ADDR_RGBW_SPOTS3, "Master", "Red", "Green", "Blue", "White", "Flash", "Prgrm");
+		RGBWSpot spot2 = null; // new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
+		RGBWSpot spot3 = null; // new RGBWSpot(ADDR_RGBW_SPOTS3, "Master", "Red", "Green", "Blue", "White", "Flash", "Prgrm");
 		LaserHead lasers = new LaserHead(ADDR_LASER, 
 				"Mode", // 50 values/step 
 				"Pattern", // 10 values/step 
@@ -76,38 +78,38 @@ public class JLightDMX {
 				"Y-Pos", 
 				"Speed" // Inverse - 255 is slowest 
 				,"???", "???"); 
-		MovingHead moving1 = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		//MovingHead moving2 = new MovingHead(ADDR_MOVING2, "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		MovingHead moving1 = null; // new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		MovingHead moving2 = null; // new MovingHead(ADDR_MOVING2, "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
 		ChannelDebug debug = new ChannelDebug();
 		ChannelTest channel = new ChannelTest();
 		Settings settings = new Settings(frame, frame.getContentPane(), debug, channel);
 
 		Border border = createLineBorder(WHITE);
-		sound.setBorder(border);
-		spots1.setBorder(border);
-		fogger.setBorder(border);
-		spots2.setBorder(border);
-		spots3.setBorder(border);
-		lasers.setBorder(border);
-		moving1.setBorder(border);
-		//moving2.setBorder(border);
-		settings.setBorder(border);
-		debug.setBorder(border);
-		channel.setBorder(border);
+		setBorder(sound,border);
+		setBorder(spots1,border);
+		setBorder(fogger,border);
+		setBorder(spot2, border);
+		setBorder(spot3, border);
+		setBorder(lasers, border);
+		setBorder(moving1, border);
+		setBorder(moving2, border);
+		setBorder(settings, border);
+		setBorder(debug, border);
+		setBorder(channel, border);
 
-		frame.add(settings);
-		frame.add(sound);
-		frame.add(spots1);
-		frame.add(fogger);
-		frame.add(spots2);
-		frame.add(spots3);
+		add(frame, settings);
+		add(frame, sound);
+		add(frame, spots1);
+		add(frame, fogger);
+		add(frame, spot2);
+		//frame.add(spots3);
 		//frame.add(lasers);
 
-		JPanel movings = new JPanel();
-		movings.setLayout(new GridLayout(1, 2));
-		//movings.add(moving1);
-		//movings.add(moving2);
-		frame.add(movings);
+//		JPanel movings = new JPanel();
+//		movings.setLayout(new GridLayout(1, 2));
+//		add(movings, moving1);
+//		add(movings, moving2);
+//		add(frame, movings);
 
 		frame.add(channel);
 		frame.add(debug);
@@ -123,24 +125,25 @@ public class JLightDMX {
 		int fps = 40;
 		int millis = (int) Math.round(1000.0/fps);
 		
-		long loop = 0;
+		long loopCount = 0;
 		long lastSent = 0;
 		String last = "";
 		while (true) {
 			try {
-				sound.loop(loop, packet);
-				spots1.loop(loop, packet);
-				fogger.loop(loop, packet);
-				spots2.loop(loop, packet);
-				spots3.loop(loop, packet);
-				lasers.loop(loop, packet);
-				moving1.loop(loop, packet);
-				//moving2.loop(loop, packet);
-				settings.loop(loop, packet);
-				channel.loop(loop, packet);
-				debug.loop(loop, packet);
+				packet.setLoopCount(loopCount);
+				loop(sound, packet);
+				loop(spots1, packet);
+				loop(fogger, packet);
+				loop(spot2, packet);
+				loop(spot3, packet);
+				loop(lasers, packet);
+				loop(moving1, packet);
+				loop(moving2, packet);
+				loop(settings, packet);
+				loop(channel, packet);
+				loop(debug, packet);
 
-				loop++;
+				loopCount++;
 
 				long now = System.currentTimeMillis();
 				long next = lastSent + millis; 
@@ -154,16 +157,35 @@ public class JLightDMX {
 				} else {
 					String line = packet.toString();
 					if (!line.equals(last)) {
-						System.out.println(loop + ": " + line);
+						System.out.println(loopCount + ": " + line);
 						last = line;
 					}
 					if (packet.isBeat()) {
-						System.out.println("main: beat");
+						//System.out.println("main: beat");
 					}
 				}
 			} catch (Exception e) {
 				System.out.println("Exception in Main: " + e);
 			}
+		}
+	}
+
+	private static void loop(DmxControlInterface control, DmxPacket packet) {
+		if (null!=control) {
+			long loopCount = packet.getLoopCount();					
+			control.loop(loopCount, packet);
+		}
+	}
+
+	private static void add(JFrame frame, JPanel p) {
+		if (null!=p) {
+			frame.add(p);
+		}
+	}
+
+	private static void setBorder(JPanel p, Border border) {
+		if (null!=p) {
+			p.setBorder(border);
 		}
 	}
 

@@ -38,7 +38,7 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 		r.setBackground(RED.darker());
 		g.setBackground(GREEN.darker());
 		b.setBackground(BLUE.darker());
-		w.setBackground(WHITE.darker());
+		w.setBackground(WHITE);
 
 		sliderPanel.add(r);
 		sliderPanel.add(g);
@@ -69,7 +69,7 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 		listener = l;
 	}
 
-	public int getRGB() {
+	public int getWRGB() {
 		return (w.getValue() << 24) | (r.getValue() << 16) | (g.getValue() << 8) | b.getValue();
 	}
 
