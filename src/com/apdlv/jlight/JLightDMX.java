@@ -90,7 +90,7 @@ public class JLightDMX {
 				"Speed" // Inverse - 255 is slowest 
 				,"???", "???"); 
 		MovingHead moving1 = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		MovingHead moving2 = new MovingHead(ADDR_MOVING2, "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		MovingHead moving2 = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
 		ChannelDebug debug = new ChannelDebug();
 		ChannelTest channel = new ChannelTest();
 		Settings settings = new Settings(frame, frame.getContentPane(), debug, channel);
@@ -113,6 +113,8 @@ public class JLightDMX {
 		add(frame, spots1);
 		add(frame, fogger);
 		add(frame, spot2);
+		add(frame, moving1);
+		add(frame, moving2);
 		//frame.add(spots3);
 		//frame.add(lasers);
 

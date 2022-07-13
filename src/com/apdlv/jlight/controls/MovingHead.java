@@ -47,8 +47,8 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		anims.add(newButton("Off"));
 		add(anims);
 		
-		//this.position = new XYView(65535, 65535);
-		//add(position);
+		this.position = new XYView(65535, 65535);
+		add(position);
 		
 		for (int i=0; i<sliders.length; i++) {
 			
