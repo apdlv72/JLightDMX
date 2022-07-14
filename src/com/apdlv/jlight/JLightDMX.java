@@ -42,7 +42,7 @@ import com.apdlv.jlight.dmx.DmxPacket;
 public class JLightDMX {
 
 	//private static final int ADDR_RGB_SPOTS = 0;
-	private static final int ADDR_RGBW_SPOTS = 64;
+	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
 	private static final int ADDR_RGBW_SPOTS2 = 60-1;
 	//private static final int ADDR_RGBW_SPOTS3 = 70-1;
 	
@@ -78,10 +78,9 @@ public class JLightDMX {
 		frame.getContentPane().setLayout(layout);
 		
 		SoundControl sound = new SoundControl();
-		RGBWSpotArray spots1 = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
+		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
-		RGBWSpot spot2 = null; // new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
-		RGBWSpot spot3 = null; // new RGBWSpot(ADDR_RGBW_SPOTS3, "Master", "Red", "Green", "Blue", "White", "Flash", "Prgrm");
+		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
 		LaserHead lasers = new LaserHead(ADDR_LASER, 
 				"Mode", // 50 values/step 
 				"Pattern", // 10 values/step 
@@ -97,10 +96,9 @@ public class JLightDMX {
 
 		Border border = createLineBorder(WHITE);
 		setBorder(sound,border);
-		setBorder(spots1,border);
+		setBorder(rgbwSpots,border);
 		setBorder(fogger,border);
-		setBorder(spot2, border);
-		setBorder(spot3, border);
+		//setBorder(spot, border);
 		setBorder(lasers, border);
 		setBorder(moving1, border);
 		setBorder(moving2, border);
@@ -110,13 +108,12 @@ public class JLightDMX {
 
 		add(frame, settings);
 		add(frame, sound);
-		add(frame, spots1);
+		add(frame, rgbwSpots);
 		add(frame, fogger);
-		add(frame, spot2);
+		frame.add(lasers);
+		//add(frame, spot);
 		add(frame, moving1);
 		add(frame, moving2);
-		//frame.add(spots3);
-		//frame.add(lasers);
 
 //		JPanel movings = new JPanel();
 //		movings.setLayout(new GridLayout(1, 2));
@@ -145,13 +142,12 @@ public class JLightDMX {
 			try {
 				packet.setLoopCount(loopCount);
 				loop(sound, packet);
-				loop(spots1, packet);
+				loop(rgbwSpots, packet);
 				loop(fogger, packet);
-				loop(spot2, packet);
-				loop(spot3, packet);
-				loop(lasers, packet);
+				//loop(spot, packet);
 				loop(moving1, packet);
 				loop(moving2, packet);
+				loop(lasers, packet);
 				loop(settings, packet);
 				loop(channel, packet);
 				loop(debug, packet);

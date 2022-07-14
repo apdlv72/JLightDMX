@@ -150,7 +150,6 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		JLabel trs = new JLabel("Tres");
 		panel.add(new LabeledPanel(trs, treshold));
 		JLabel dur = new JLabel("Dur");
-		dur.setEnabled(false);
 		panel.add(new LabeledPanel(dur, duration));
 		
 		button = new JLabel("info");
