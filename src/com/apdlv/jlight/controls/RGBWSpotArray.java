@@ -177,31 +177,46 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	
 	Random rand = new Random();
 	
-	int colors[] = {
+	int randomColors[] = {
 			0b0001, 0b0010, 0b0100, 0b1000, // r g b w
 			0b0011, 0b0110, 0b0101, // rg, gb, rb 
 			0b1001, 0b1010, 0b1100, // wr wg wb
 			0b0111, // rgb
 	};
+	int circleColors[] = {
+			0b0100,
+			0b0010, 
+			0b0001, 
+	};
 	
-	int lastIndex = -1;
+	int lastIndex = 0;
 
 	public void loop(long count, DmxPacket packet) {
 		int len = sliders.length; // sliders.length;
 		
 		if (packet.isBeat()) {
 			if (controls.sound.isSelected()) {
-				int index = rand.nextInt(colors.length);
-				while (index == lastIndex) {
+				
+				int[] colors = null;
+				int index = 0;
+				
+				if (controls.rand.isSelected()) {
+					 colors = randomColors;
+					 index = (lastIndex + 1) % randomColors.length;							 
+				} else { 				
+					colors = circleColors;
 					index = rand.nextInt(colors.length);
+					while (index == lastIndex) {
+						index = rand.nextInt(colors.length);
+					}
 				}
 				lastIndex = index;
 				
 				int dice = colors[index];
-				int w = (1 & dice)>0 ? 255 : 0;
-				int r = (2 & dice)>0 ? 255 : 0;
-				int g = (4 & dice)>0 ? 255 : 0;
-				int b = (8 & dice)>0 ? 255 : 0;				
+				int r = (1 & dice)>0 ? 255 : 0;
+				int g = (2 & dice)>0 ? 255 : 0;
+				int b = (4 & dice)>0 ? 255 : 0;				
+				int w = (8 & dice)>0 ? 255 : 0;
 				int wrgb = (w << 24) | (r << 16) | (g << 8) | b;				
 				//System.out.println("BOOM dice=" + dice + " wrgb=" + wrgb);				
 				master.setWRGB(wrgb);

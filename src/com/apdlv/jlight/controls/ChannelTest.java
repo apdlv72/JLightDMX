@@ -30,11 +30,11 @@ public class ChannelTest extends JPanel implements DmxControlInterface, ChangeLi
 	
 	public ChannelTest() {
 		
-		addressLabel  = new JLabel("Address");
+		addressLabel  = new JLabel("Adr1");
 		addressSlider = new MySlider("-1", VERTICAL, -1, 511, -1);
 		addressSlider.addChangeListener(this);
 		
-		valueLabel  = new JLabel("Value");
+		valueLabel  = new JLabel("Val1");
 		valueSlider = new MySlider("-1", VERTICAL, -1, 255, -1);
 		valueSlider.addChangeListener(this);
 		

@@ -25,8 +25,6 @@ import com.apdlv.jlight.controls.DmxControlInterface;
 import com.apdlv.jlight.controls.FogMachine;
 import com.apdlv.jlight.controls.LaserHead;
 import com.apdlv.jlight.controls.MovingHead;
-import com.apdlv.jlight.controls.RGBSpotArray;
-import com.apdlv.jlight.controls.RGBWSpot;
 import com.apdlv.jlight.controls.RGBWSpotArray;
 import com.apdlv.jlight.controls.Settings;
 import com.apdlv.jlight.controls.SoundControl;
@@ -78,12 +76,12 @@ public class JLightDMX {
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
 		LaserHead lasers = new LaserHead(ADDR_LASER, 
-				"Mode", // 50 values/step 
-				"Pattern", // 10 values/step 
+				"Laser"  , // 50 values/step 
+				"Pattern" , // 10 values/step 
 				"X-Swap", 
 				"Y-Pos", 
 				"Speed" // Inverse - 255 is slowest 
-				,"???", "???"); 
+				); 
 		MovingHead moving1  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
 		MovingHead moving2  = null; // new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
 		ChannelDebug debug  = new ChannelDebug();
@@ -134,8 +132,8 @@ public class JLightDMX {
 				loop(rgbwSpots, packet);
 				loop(fogger, packet);
 				//loop(spot, packet);
-				loop(moving1, packet);
-				loop(moving2, packet);
+				//loop(moving1, packet);
+				//loop(moving2, packet);
 				loop(lasers, packet);
 				loop(settings, packet);
 				loop(channel, packet);
