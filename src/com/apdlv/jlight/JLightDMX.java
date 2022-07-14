@@ -43,8 +43,6 @@ public class JLightDMX {
 
 	//private static final int ADDR_RGB_SPOTS = 0;
 	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
-	private static final int ADDR_RGBW_SPOTS2 = 60-1;
-	//private static final int ADDR_RGBW_SPOTS3 = 70-1;
 	
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_LASER = 255;
@@ -64,12 +62,10 @@ public class JLightDMX {
 			UIManager.setLookAndFeel(name);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.err.println("Failed to set " + name);
 		}
 		
 		DmxPacket packet = new DmxPacket();
-
 		ArtNetLib artnet = new ArtNetLib("255.255.255.255");
 		JFrame frame = new JFrame();
 		LayoutManager layout = new GridLayout(4, 1);
@@ -88,11 +84,11 @@ public class JLightDMX {
 				"Y-Pos", 
 				"Speed" // Inverse - 255 is slowest 
 				,"???", "???"); 
-		MovingHead moving1 = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		MovingHead moving2 = null; // new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		ChannelDebug debug = new ChannelDebug();
+		MovingHead moving1  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		MovingHead moving2  = null; // new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		ChannelDebug debug  = new ChannelDebug();
 		ChannelTest channel = new ChannelTest();
-		Settings settings = new Settings(frame, frame.getContentPane(), debug, channel);
+		Settings settings   = new Settings(frame, frame.getContentPane(), debug, channel);
 
 		Border border = createLineBorder(WHITE);
 		setBorder(sound,border);
@@ -110,19 +106,12 @@ public class JLightDMX {
 		add(frame, sound);
 		add(frame, rgbwSpots);
 		add(frame, fogger);
-		frame.add(lasers);
+		add(frame, lasers);
 		//add(frame, spot);
 		add(frame, moving1);
 		add(frame, moving2);
-
-//		JPanel movings = new JPanel();
-//		movings.setLayout(new GridLayout(1, 2));
-//		add(movings, moving1);
-//		add(movings, moving2);
-//		add(frame, movings);
-
-		frame.add(channel);
-		frame.add(debug);
+		add(frame, channel);
+		add(frame, debug);
 
 		setColors(frame.getContentPane());
 
@@ -160,9 +149,9 @@ public class JLightDMX {
 				//System.out.println("delay: " + delay);
 				Thread.sleep(delay);
 
-				lastSent = System.currentTimeMillis();
 				if (doSend) {
 					artnet.sendArtDmxPacket(packet.data, (byte) 0, (byte) 0, (byte) 0);
+					lastSent = System.currentTimeMillis();
 				} else {
 					String line = packet.toString();
 					if (!line.equals(last)) {
