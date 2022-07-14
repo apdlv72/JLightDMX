@@ -106,10 +106,10 @@ public class JLightDMX {
 		add(frame, fogger);
 		add(frame, lasers);
 		//add(frame, spot);
-		add(frame, moving1);
-		add(frame, moving2);
 		add(frame, channel);
 		add(frame, debug);
+		add(frame, moving1);
+		add(frame, moving2);
 
 		setColors(frame.getContentPane());
 
