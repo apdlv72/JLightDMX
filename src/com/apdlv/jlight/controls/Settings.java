@@ -129,7 +129,7 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 			long deltaTime = now-lastUpdate;
 			double fps = (1000.0*deltaFrames)/deltaTime;
 			String text = String.format("%7d frames, %2.1f f/s", count-1, fps);
-			System.out.println(text);
+			//System.out.println(text);
 			info.setText(text);
 			lastUpdate  = now;
 			lastFrames = count;
