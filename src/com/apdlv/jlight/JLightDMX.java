@@ -149,17 +149,14 @@ public class JLightDMX {
 
 				if (doSend) {
 					artnet.sendArtDmxPacket(packet.data, (byte) 0, (byte) 0, (byte) 0);
-					lastSent = System.currentTimeMillis();
 				} else {
 					String line = packet.toString();
 					if (!line.equals(last)) {
 						System.out.println(loopCount + ": " + line);
 						last = line;
 					}
-					if (packet.isBeat()) {
-						//System.out.println("main: beat");
-					}
 				}
+				lastSent = System.currentTimeMillis();
 			} catch (Exception e) {
 				System.out.println("Exception in Main: " + e);
 			}

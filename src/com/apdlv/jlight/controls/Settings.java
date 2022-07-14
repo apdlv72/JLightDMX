@@ -112,6 +112,11 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 	
 	@Override
 	public void loop(long count, DmxPacket packet) {
+		
+		if (count>10) {
+			count = count;
+		}
+		
 		if (black.isSelected()) {
 			for (int i=0; i<packet.data.length; i++) {
 				packet.data[i] = 0;
@@ -123,9 +128,9 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 			long deltaFrames = count-lastFrames;
 			long deltaTime = now-lastUpdate;
 			double fps = (1000.0*deltaFrames)/deltaTime;
-			//System.out.println(fps);
-			
-			info.setText(String.format("%7d frames, %2.1f f/s", count-1, fps));
+			String text = String.format("%7d frames, %2.1f f/s", count-1, fps);
+			System.out.println(text);
+			info.setText(text);
 			lastUpdate  = now;
 			lastFrames = count;
 		}
