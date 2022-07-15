@@ -199,7 +199,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		
 		int maxY = bounds.y + bounds.height + 400;
 		size.height = maxY;
-		size.width -= 100;;
+		size.width -= 100;
 		panel.setPreferredSize(size);		
 		panel.setSize(size);		
 	}

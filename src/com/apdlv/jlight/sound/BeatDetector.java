@@ -63,7 +63,7 @@ public final class BeatDetector {
         significanceThreshold = v;		
 	}
 
-	public void setVolume(float v) {
-		this.volume = v;
+	public void setVolume(double v) {
+		this.volume = (float)v;
 	}
 }
