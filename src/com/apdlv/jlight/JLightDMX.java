@@ -34,6 +34,8 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
@@ -67,6 +69,14 @@ public class JLightDMX extends JFrame implements SettingsListener {
 	private boolean doSend;
 
 	public static void main(String[] args) {
+		String name = UIManager.getCrossPlatformLookAndFeelClassName();
+		try {
+			UIManager.setLookAndFeel(name);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e1) {
+			System.err.println("Failed to set " + name);
+		}
+
 		JLightDMX main = new JLightDMX();
 		main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		main.setVisible(true);
