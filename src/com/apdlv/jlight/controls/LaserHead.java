@@ -27,7 +27,7 @@ public class LaserHead extends JPanel implements DmxControlInterface, ChangeList
 	
 	@Override
 	public Insets getInsets() {
-		return new Insets(13, 20, 14, 20);
+		return new Insets(13, 30, 14, 30);
 	}
 	
 	public LaserHead(int dmxAddr, String ... channels) {

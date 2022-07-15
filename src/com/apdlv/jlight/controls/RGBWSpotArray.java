@@ -36,7 +36,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(0, 10, 0, 10);
+		return new Insets(0, 10, 0, 0);
 	}
 	
 	class Controls extends JPanel implements ChangeListener, MouseListener {
