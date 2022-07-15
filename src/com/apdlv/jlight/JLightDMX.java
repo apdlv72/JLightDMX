@@ -1,21 +1,41 @@
 package com.apdlv.jlight;
 
 import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
+import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+import static java.awt.event.KeyEvent.VK_ESCAPE;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 import static javax.swing.BorderFactory.createLineBorder;
+import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
+import static javax.swing.KeyStroke.getKeyStroke;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.JRootPane;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import com.apdlv.jlight.components.SelfMaintainedBackground;
 import com.apdlv.jlight.components.SelfMaintainedForeground;
@@ -27,51 +47,92 @@ import com.apdlv.jlight.controls.LaserHead;
 import com.apdlv.jlight.controls.MovingHead;
 import com.apdlv.jlight.controls.RGBWSpotArray;
 import com.apdlv.jlight.controls.Settings;
+import com.apdlv.jlight.controls.Settings.SettingsListener;
 import com.apdlv.jlight.controls.SoundControl;
 import com.apdlv.jlight.dmx.ArtNetLib;
 import com.apdlv.jlight.dmx.DmxPacket;
 
-/**
- * ArtNet Tester class
- * 
- * @author: Mirco Borella
- */
-
-public class JLightDMX {
-
-	//private static final int ADDR_RGB_SPOTS = 0;
+@SuppressWarnings("serial")
+public class JLightDMX extends JFrame implements SettingsListener {
+	
 	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
 	
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_LASER = 255;
 	private static final int ADDR_MOVING1 = 300-1; // channels 300 - 311
-	private static final int ADDR_MOVING2 = 320-1; // channel 320 - 331
+	//private static final int ADDR_MOVING2 = 320-1; // channel 320 - 331
 
-	/**
-	 * Main loop
-	 * 
-	 * @param args Arguments
-	 * @throws Exception if problems
-	 */
+	Settings settings;
+
+	private boolean doSend;
+
 	public static void main(String[] args) {
+		JLightDMX main = new JLightDMX();
+		main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		main.setVisible(true);
+		main.processPackets();
+	}
+	
+	void processPackets() {
+		ArtNetLib artnet = new ArtNetLib("255.255.255.255");
+		DmxPacket packet = new DmxPacket();
 
-		String name = UIManager.getCrossPlatformLookAndFeelClassName();
-		try {
-			UIManager.setLookAndFeel(name);
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e1) {
-			System.err.println("Failed to set " + name);
+		int fps = 40;
+		int millis = (int) Math.round(1000.0/fps);
+		
+		long loopCount = 0;
+		long lastSent = 0;
+		String last = "";
+		while (true) {
+			try {
+				packet.setLoopCount(loopCount++);				
+				for (DmxControlInterface control : controls) {				
+					control.loop(loopCount, packet);
+				}
+
+				long now = currentTimeMillis();
+				long next = lastSent + millis; 
+				long delay = Math.max(0, next - now);
+				sleep(delay);
+
+				lastSent = currentTimeMillis();
+				if (doSend) {
+					artnet.sendArtDmxPacket(packet.data, (byte) 0, (byte) 0, (byte) 0);
+				} else {
+					String line = packet.toString();
+					if (!line.equals(last)) {
+						System.out.println(loopCount + ": " + line);
+						last = line;
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("processPackets: " + e);
+			}
 		}
 		
-		DmxPacket packet = new DmxPacket();
-		ArtNetLib artnet = new ArtNetLib("255.255.255.255");
-		JFrame frame = new JFrame();
-		LayoutManager layout = new GridLayout(4, 1);
-		layout = new FlowLayout();
-
-		frame.getContentPane().setLayout(layout);
+	}
+	
+	public JLightDMX() {
 		
-		SoundControl sound = new SoundControl();
+		Border empty = BorderFactory.createEmptyBorder();
+		
+		this.setLayout(new BorderLayout());
+		this.setBackground(BLACK);
+		
+		Dimension screenSize = Toolkit. getDefaultToolkit(). getScreenSize();
+		
+		JPanel panel = new JPanel();
+		panel.setSize(screenSize);
+		panel.setBackground(BLACK);
+		
+		Dimension prefSize = new Dimension(screenSize.width-40, 2*screenSize.height);		
+		panel.setPreferredSize(prefSize);				
+		panel.setLayout(new FlowLayout());
+		
+		settings = new Settings(this, panel, null, null);
+		settings.addSettingsListener(this);
+		
+		SoundControl sound = new SoundControl();			
 		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
@@ -82,108 +143,131 @@ public class JLightDMX {
 				"Y-Pos", 
 				"Speed" // Inverse - 255 is slowest 
 				); 
-		MovingHead moving1  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		MovingHead moving2  = null; // new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
-		ChannelDebug debug  = new ChannelDebug();
-		ChannelTest channel = new ChannelTest();
-		Settings settings   = new Settings(frame, frame.getContentPane(), debug, channel);
-
-		Border border = createLineBorder(WHITE);
-		setBorder(sound,border);
-		setBorder(rgbwSpots,border);
-		setBorder(fogger,border);
-		//setBorder(spot, border);
-		setBorder(lasers, border);
-		setBorder(moving1, border);
-		setBorder(moving2, border);
-		setBorder(settings, border);
-		setBorder(debug, border);
-		setBorder(channel, border);
-
-		add(frame, settings);
-		add(frame, sound);
-		add(frame, rgbwSpots);
-		add(frame, fogger);
-		add(frame, lasers);
-		//add(frame, spot);
-		add(frame, channel);
-		add(frame, debug);
-		add(frame, moving1);
-		add(frame, moving2);
-
-		setColors(frame.getContentPane());
-
-		frame.pack();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-
-		packet = new DmxPacket();
-
-		int fps = 40;
-		int millis = (int) Math.round(1000.0/fps);
+		MovingHead moving  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		channelDebugControl = new ChannelDebug();
+		channelTestControl = new ChannelTest();
 		
-		long loopCount = 0;
-		long lastSent = 0;
-		String last = "";
-		while (true) {
-			try {
-				packet.setLoopCount(loopCount);
-				loop(sound, packet);
-				loop(rgbwSpots, packet);
-				loop(fogger, packet);
-				//loop(spot, packet);
-				//loop(moving1, packet);
-				//loop(moving2, packet);
-				loop(lasers, packet);
-				loop(settings, packet);
-				loop(channel, packet);
-				loop(debug, packet);
+		addControl(panel, settings);
+		addControl(panel, sound);
+		addControl(panel, rgbwSpots);
+		addControl(panel, fogger);
+		addControl(panel, lasers);
+		//addControl(panel, spot);
+		addControl(panel, channelTestControl);
+		addControl(panel, channelDebugControl);
+		addControl(panel, moving);
+		
+		// order matters below because it determines, which control will have it's loop method called first:
+		// sound comes first (for beat detection)
+		controls.add(sound);
+		controls.add(rgbwSpots);
+		controls.add(fogger);
+		//controls.add(spot);
+		//controls.add(moving1);
+		//controls.add(moving2);
+		controls.add(lasers);
+		controls.add(channelTestControl);
+		// settings comes but last (for blackout)
+		controls.add(settings);
+		controls.add(channelDebugControl);
+						
+		this.setPreferredSize(screenSize);
+		JScrollPane scroll = new JScrollPane(panel);
+		scroll.setBorder(empty);
+		scroll.setBackground(BLACK);
+		this.add(scroll);
 
-				loopCount++;
+		setColors(panel);		
+		setScrollbarColors(scroll.getVerticalScrollBar());
+		setScrollbarColors(scroll.getHorizontalScrollBar());		
+				
+		addEscapeListener(this, settings);
+		
+		this.pack();
+		Dimension size = panel.getSize();
+		Rectangle bounds = moving.getBounds();
+		
+		int maxY = bounds.y + bounds.height + 400;
+		size.height = maxY;
+		size.width -= 100;;
+		panel.setPreferredSize(size);		
+		panel.setSize(size);		
+	}
+	
+	public static void addEscapeListener(final JFrame frame, Settings settings) {
+	    ActionListener escListener = new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {	        	
+	        	settings.toggleFullscreen();
+	        }
+	    };
+	    ActionListener quitListener = new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {	        	
+	        	System.exit(0);
+	        }
+	    };
 
-				long now = System.currentTimeMillis();
-				long next = lastSent + millis; 
-				long delay = Math.max(0, next - now);
-				//System.out.println("delay: " + delay);
-				Thread.sleep(delay);
-
-				if (doSend) {
-					artnet.sendArtDmxPacket(packet.data, (byte) 0, (byte) 0, (byte) 0);
-				} else {
-					String line = packet.toString();
-					if (!line.equals(last)) {
-						System.out.println(loopCount + ": " + line);
-						last = line;
-					}
-				}
-				lastSent = System.currentTimeMillis();
-			} catch (Exception e) {
-				System.out.println("Exception in Main: " + e);
-			}
-		}
+	    JRootPane root = frame.getRootPane();
+	    root.registerKeyboardAction(escListener,
+	            getKeyStroke(VK_ESCAPE, 0),
+	            WHEN_IN_FOCUSED_WINDOW);
+	    root.registerKeyboardAction(quitListener,
+	            getKeyStroke(VK_Q, CTRL_DOWN_MASK),
+	            WHEN_IN_FOCUSED_WINDOW);
+	}
+	
+	private void setScrollbarColors(JScrollBar bar) {
+		bar.setBackground(BLACK);
+		bar.setUI(new BasicScrollBarUI() {
+			Color gray = GRAY.darker().darker().darker();
+		    @Override
+		    protected void configureScrollBarColors() {		    	
+		        this.thumbColor = GRAY.darker().darker();
+		        this.thumbDarkShadowColor = gray;
+		        this.thumbHighlightColor = gray;
+		        this.thumbLightShadowColor = gray;		        		
+		    }		    
+		    @Override
+		    protected JButton createDecreaseButton(int orientation) {
+		    	return createZeroButton();	    
+		    }
+		    @Override
+		    protected JButton createIncreaseButton(int orientation) {
+	            return createZeroButton();
+		    }
+		    @Override
+		    protected void paintIncreaseHighlight(Graphics g) {
+		    	//super.paintIncreaseHighlight(g);
+		    }
+		    @Override
+		    protected void paintDecreaseHighlight(Graphics g) {
+		    	super.paintDecreaseHighlight(g);
+		    }
+		    private JButton createZeroButton() {
+		        JButton jbutton = new JButton();
+		        jbutton.setPreferredSize(new Dimension(0, 0));
+		        jbutton.setMinimumSize(new Dimension(0, 0));
+		        jbutton.setMaximumSize(new Dimension(0, 0));
+		        return jbutton;
+		    }
+		});
 	}
 
-	private static void loop(DmxControlInterface control, DmxPacket packet) {
-		if (null!=control) {
-			long loopCount = packet.getLoopCount();					
-			control.loop(loopCount, packet);
-		}
-	}
+	List<DmxControlInterface> controls = new ArrayList<>();
 
-	private static void add(JFrame frame, JPanel p) {
+	private ChannelDebug channelDebugControl;
+
+	private ChannelTest channelTestControl;
+	
+	private static void addControl(JPanel panel, JPanel p) {
 		if (null!=p) {
-			frame.add(p);
-		}
-	}
-
-	private static void setBorder(JPanel p, Border border) {
-		if (null!=p) {
+			panel.add(p);
+			Border border = createLineBorder(WHITE);
 			p.setBorder(border);
 		}
 	}
-
-	private static boolean doSend = false;
-
+	
 	private static void setColors(Component c) {
 		if (c instanceof JCheckBox) {
 			JCheckBox cb = (JCheckBox) c;
@@ -210,7 +294,21 @@ public class JLightDMX {
 		}
 	}
 
-	public static void setSending(boolean doSend) {
-		JLightDMX.doSend = doSend;
+	private static void setBorder(JPanel p, Border border) {
+		if (null!=p) {
+			p.setBorder(border);
+		}
+	}
+
+	@Override
+	public void setSending(boolean sending) {
+		this.doSend = sending;
+		System.err.println("setSending: " + sending);
+	}
+
+	@Override
+	public void setDebug(boolean selected) {
+		channelTestControl.setVisible(selected);
+		channelDebugControl.setVisible(selected);
 	}
 }

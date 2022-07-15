@@ -25,7 +25,7 @@ public class ChannelTest extends JPanel implements DmxControlInterface, ChangeLi
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(8, 30, 8, 30);
+		return new Insets(17, 20, 18, 20);
 	}
 	
 	public ChannelTest() {

@@ -20,17 +20,20 @@ public class ChannelDebug extends JPanel implements DmxControlInterface {
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(8, 20, 8, 20);
+		return new Insets(20, 20, 20, 20);
 	}
 	
 	public ChannelDebug() {
-        Font font = new Font( "Monospaced", Font.PLAIN, 8 );
+		Font font = new Font( "Monospaced", Font.PLAIN, 8 );
 		setLayout(new GridLayout(8, 1,  20,  20));
 		labels = new JLabel[8];
 		for (int i=0; i<labels.length; i++) {
-			add(labels[i] = new JLabel("test"));
+			add(labels[i] = new JLabel(""));
 			labels[i].setFont(font);
 		}
+		
+		DmxPacket dummy = new DmxPacket();
+		loop(0, dummy);		
 	}
 	
 	long lastUpdate = -1;

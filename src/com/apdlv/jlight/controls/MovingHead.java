@@ -1,7 +1,5 @@
 package com.apdlv.jlight.controls;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GRAY;
 import static javax.swing.SwingConstants.VERTICAL;
 
 import java.awt.Color;
@@ -30,7 +28,7 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 	
 	@Override
 	public Insets getInsets() {
-		return new Insets(8, 20, 8, 20);
+		return new Insets(17, 20, 18, 20);
 	}
 	
 	public MovingHead(int dmxAddr, String ... channels) {
@@ -50,42 +48,44 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		this.position = new XYView(65535, 65535);
 		add(position);
 		
+		Color c = Color.BLACK;
 		for (int i=0; i<sliders.length; i++) {
 			
 			int max = 255;
 			String name = channels[i];
 			switch (name) {
 			case "XPos":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, 65535, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, 65535, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "YPos":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, 65535, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, 65535, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Speed":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Color":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				//sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Pattern":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Strobe":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Light":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			case "Progr":
-				sliders[i] = new ColorSlider(name, VERTICAL, 0, max, 0);
-				sliders[i].setBackground(GRAY);
+				sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);
+				sliders[i].setBackground(c);
 				break;
 			default:
 				//sliders[i] = new MySlider(name, VERTICAL, 0, max, 0);

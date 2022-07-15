@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.LayoutManager;
 
 import javax.swing.JButton;
@@ -165,6 +166,11 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 	    
 	}
 
+	@Override
+	public Insets getInsets() {
+		return new Insets(5, 5, 17, 5);
+	}
+	
 	@Override
 	public void loop(long count, DmxPacket packet) {
 		if (null==thread) {

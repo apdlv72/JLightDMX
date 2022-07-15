@@ -19,6 +19,7 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -28,7 +29,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.apdlv.jlight.JLightDMX;
+import com.apdlv.jlight.JLightDMXOld;
 import com.apdlv.jlight.components.SelfMaintainedBackground;
 import com.apdlv.jlight.components.SelfMaintainedForeground;
 import com.apdlv.jlight.dmx.DmxPacket;
@@ -36,13 +37,20 @@ import com.apdlv.jlight.dmx.DmxPacket;
 @SuppressWarnings("serial")
 public class Settings extends JPanel implements DmxControlInterface, ActionListener {
 	
+	public interface SettingsListener {
+		void setSending(boolean sending);
+
+		void setDebug(boolean selected);		
+	}
+
+	private JFrame frame;
+	private Container container;
+
 	private JButton dark;
 	private JButton light;
-	private Container container;
 	private JCheckBox black;
 	private JLabel info;
 	private JCheckBox full;
-	private JFrame frame;
 	private JCheckBox debug;
 	private ChannelDebug debugPanel;
 	private JCheckBox send;
@@ -52,11 +60,12 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 	private GraphicsDevice device;
 	private boolean isFull;
 	private ChannelTest channelTest;
+	private List<SettingsListener> listeners = new ArrayList<>();
 	
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(8, 20, 8, 20);
+		return new Insets(12, 20, 13, 20);
 	}
 	
 	public Settings(JFrame frame, Container container, ChannelDebug debugPanel, ChannelTest channelTest) {
@@ -110,12 +119,12 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 		super.setBackground(YELLOW);							
 	}
 	
+	public void addSettingsListener(SettingsListener l) {
+		listeners .add(l);
+	}
+	
 	@Override
 	public void loop(long count, DmxPacket packet) {
-		
-		if (count>10) {
-			count = count;
-		}
 		
 		if (black.isSelected()) {
 			for (int i=0; i<packet.data.length; i++) {
@@ -157,12 +166,18 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 				isFull = true;
 			}
 		} else if (debug==s) {
-			debugPanel.setVisible(debug.isSelected());
-			channelTest.setVisible(debug.isSelected());
+			if (null!=debugPanel) debugPanel.setVisible(debug.isSelected());
+			if (null!=channelTest) channelTest.setVisible(debug.isSelected());
+			for (SettingsListener l : listeners) {
+				l.setDebug(debug.isSelected());
+			}
 		} else if (send==s) {
 			boolean selected = send.isSelected();
+			for (SettingsListener l : listeners) {
+				l.setSending(send.isSelected());
+			}
 			info.setVisible(selected);
-			JLightDMX.setSending(selected);			
+			JLightDMXOld.setSending(selected);			
 			Color c = selected ? bg : YELLOW;
 			super.setBackground(c);					
 		}
@@ -193,6 +208,17 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 				setColors(x, fg, bg);
 			}
 		}
+	}
+
+	public void toggleFullscreen() {
+		if (isFull) {
+			device.setFullScreenWindow(null);
+			isFull = false;				
+		} else {
+			device.setFullScreenWindow(frame);
+			isFull = true;
+		}
+		full.setSelected(isFull);
 	}
 
 }
