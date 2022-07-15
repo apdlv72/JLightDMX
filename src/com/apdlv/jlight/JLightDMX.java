@@ -173,7 +173,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		controls.add(rgbwSpots);
 		controls.add(fogger);
 		//controls.add(spot);
-		//controls.add(moving1);
+		controls.add(moving);
 		//controls.add(moving2);
 		controls.add(lasers);
 		controls.add(channelTestControl);

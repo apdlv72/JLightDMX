@@ -133,20 +133,22 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 			wasOff = isOff;
 		}
 
-		int addr = dmxAddr;
-		for (int i=0; i<sliders.length; i++) {
-			MySlider slider = sliders[i];
-			boolean _16bit = slider.getMaximum() > 255;
-			int value = sliders[i].getValue();
-			byte hi = (byte) ((value >> 8) & 0xff);
-			byte lo = (byte) ((value >> 0) & 0xff);
-			if (_16bit) {
-				packet.data[addr + 0] = hi;
-				packet.data[addr + 1] = lo;
-			} else {
-				packet.data[addr] = lo;
-			}			
-			addr += _16bit ? 2 : 1;
+		if (false) {
+			int addr = dmxAddr;
+			for (int i=0; i<sliders.length; i++) {
+				MySlider slider = sliders[i];
+				boolean _16bit = slider.getMaximum() > 255;
+				int value = sliders[i].getValue();
+				byte hi = (byte) ((value >> 8) & 0xff);
+				byte lo = (byte) ((value >> 0) & 0xff);
+				if (_16bit) {
+					packet.data[addr + 0] = hi;
+					packet.data[addr + 1] = lo;
+				} else {
+					packet.data[addr] = lo;
+				}			
+				addr += _16bit ? 2 : 1;
+			}
 		}
 	}
 
