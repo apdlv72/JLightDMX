@@ -35,7 +35,7 @@ public class FogMachine extends JPanel implements DmxControlInterface, MouseList
 	
 	@Override
 	public Insets getInsets() {
-		return new Insets(10, 36, 15, 4350);
+		return new Insets(10, 36, 15, 35);
 	}
 	
 	public FogMachine(int dmxChannel) {
