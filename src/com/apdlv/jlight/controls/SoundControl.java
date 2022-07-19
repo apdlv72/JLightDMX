@@ -35,6 +35,7 @@ import com.apdlv.jlight.sound.LevelControl;
 import com.apdlv.jlight.sound.LevelMeter;
 import com.apdlv.jlight.sound.Recorder;
 import com.apdlv.jlight.sound.ThresholdDetector;
+import com.apdlv.jlight.sound.processing.DamienQuartz;
 
 
 @SuppressWarnings("serial")
@@ -64,7 +65,7 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		}
 	}
 	
-	String options[] = { "Vol Tresh", "Beat Detect", "Peak Avg", "Off" };
+	String options[] = { "VThresh", "BeatDetect", "PeakAvg", "DQuartz", "Off" };
 	private JComboBox algo;
 	private LevelMeter meter;
 
@@ -92,7 +93,7 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		panel.add(new LabeledPanel(vol, volume));
 		JLabel dur = new JLabel("Dur");
 		panel.add(new LabeledPanel(dur, duration));
-		JLabel trs = new JLabel("Tres");
+		JLabel trs = new JLabel("Thres");
 		panel.add(new LabeledPanel(trs, treshold));
 		panel.add(meter);
 		
@@ -159,12 +160,24 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		thread = recorder;		
 		thread.start();
 	}
+	
+	private void startDQuartz() {
+		stopAll();
+		DamienQuartz dq  = new DamienQuartz();
+		dq.setMeter(meter);
+		dq.addBeatListener(this);
+		thread = dq;		
+		thread.start();
+	}
 
 	private void stopAll() {
 		if (null!=thread) {
 			thread.close();
 			thread.stop();
 		}
+		meter.setAmplitude(0);
+		meter.setPeak(0);
+		meter.setBeat(false);
 	}
 
 	@Override
@@ -197,14 +210,17 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 			String name = (String) algo.getSelectedItem();
 			System.err.println("Algo: " + name);
 			switch (name) {
-			case "Vol Tresh":
+			case "VThresh":
 				startVolumeThreshold();
 				break;
-			case "Beat Detect":
+			case "BeatDetect":
 				startBeatDetect();
 				break;
-			case "Peak Avg":
+			case "PeakAvg":
 				startPeakAverage();
+				break;
+			case "DQuartz":
+				startDQuartz();
 				break;
 			case "Off":
 				stopAll();

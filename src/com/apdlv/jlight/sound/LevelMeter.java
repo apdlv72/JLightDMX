@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 public class LevelMeter extends JPanel implements MouseListener {
 
 	public LevelMeter() {
-        setPreferredSize(new Dimension(30, 100));
+        setPreferredSize(new Dimension(30, 180));
 		addMouseListener(this);
 	}
 

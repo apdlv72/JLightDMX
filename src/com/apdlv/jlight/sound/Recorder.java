@@ -184,4 +184,9 @@ public class Recorder extends Thread implements BeatDetectorInterface {
 		System.err.println("setDuration NYI " + ms + " -> " + retention);
 	}
 
+	@Override
+	public void setMeter(LevelMeter meter) {
+		this.meter = meter;
+	}
+
 }

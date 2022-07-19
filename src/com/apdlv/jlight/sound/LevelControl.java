@@ -1,8 +1,6 @@
 package com.apdlv.jlight.sound;
 
 import java.awt.BorderLayout;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -134,4 +132,8 @@ public class LevelControl extends JPanel implements BeatDetectorInterface, DmxCo
 		packet.setBeat(meter.isOverThreshold());
 	}
 	
+	@Override
+	public void setMeter(LevelMeter meter) {
+		this.meter = meter;
+	}
 }

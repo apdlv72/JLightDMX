@@ -28,9 +28,9 @@ class RGBSliders extends JPanel implements ChangeListener {
 
 		JPanel sliderPanel = new JPanel();
 
-		r = new ColorSlider("Red",   VERTICAL, 0, 255, 0);
-		g = new ColorSlider("Green", VERTICAL, 0, 255, 0);
-		b = new ColorSlider("Blue",  VERTICAL, 0, 255, 0);
+		r = new ColorSlider(RED, "Red",   VERTICAL, 0, 255, 0);
+		g = new ColorSlider(GREEN, "Green", VERTICAL, 0, 255, 0);
+		b = new ColorSlider(BLUE, "Blue",  VERTICAL, 0, 255, 0);
 		r.setBackground(RED.darker());
 		g.setBackground(GREEN.darker());
 		b.setBackground(BLUE.darker());

@@ -38,8 +38,8 @@ public final class BeatDetector {
 
         boolean rtv = currentLoudness >= beatLoudness;
 
-        String s = String.format("cu%4.1f av%4.1f be%4.1f t%3.1f %d", 
-        		currentLoudness, averageLoudness, beatLoudness, significanceThreshold, rtv ? 1 : 0);
+        String s = String.format("cu%4.1f av%4.1f be%4.1f t%3.1f %s", 
+        		currentLoudness, averageLoudness, beatLoudness, significanceThreshold, rtv ? "*" : " ");
         if (s.length()>40) {
         	//System.err.println(s.length());
         	s = s.substring(0, 40);

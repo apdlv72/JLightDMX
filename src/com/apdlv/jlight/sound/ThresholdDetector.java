@@ -94,12 +94,12 @@ public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 //				if (lastVolume<=volumeThreshold) 
 				{
 					this.peak = true;
-					System.out.println("" + System.currentTimeMillis() + ": "+ currVolume + " > " + volumeThreshold + " -> beat");
+					//System.out.println("" + System.currentTimeMillis() + ": "+ currVolume + " > " + volumeThreshold + " -> beat");
 				}
 			}
 			
-			String info = String.format("P:%3.2f D:%3.2fs T:%3.2f V:%3.2f %5s", 
-					volumePrescale, 0.001*duration, volumeThreshold, currVolume, peak);
+			String info = String.format("P:%3.2f D:%3.2fs T:%3.2f V:%3.2f %s", 
+					volumePrescale, 0.001*duration, volumeThreshold, currVolume, peak ? "*" : " ");
 			if (!info.equals(oldInfo)) {
 				//System.out.println(info);
 				for (BeatListener l : listeners) {
@@ -161,5 +161,9 @@ public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 	
 	Set<BeatListener> listeners = new HashSet<BeatListener>();
 
+	@Override
+	public void setMeter(LevelMeter meter) {
+		this.meter = meter;
+	}
 
 }

@@ -138,4 +138,11 @@ class SoundThread extends Thread implements BeatDetectorInterface {
 		
 		Set<BeatListener> listeners = new HashSet<BeatListener>();
 
+		private LevelMeter meter;
+
+		@Override
+		public void setMeter(LevelMeter meter) {
+			this.meter = meter;
+		}
+
 	}
