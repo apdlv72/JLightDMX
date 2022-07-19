@@ -220,13 +220,22 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 				int wrgb = (w << 24) | (r << 16) | (g << 8) | b;				
 				//System.out.println("BOOM dice=" + dice + " wrgb=" + wrgb);				
 				master.setWRGB(wrgb);
+				int masterColor = master.getWRGB();
 				
-				if (!controls.chase.isSelected()) {
+				if (master.isSelected()) {
+					//System.out.println("setting " + sliders.length + " sliders to master");
+					for (int i=sliders.length-1; i>=0; i--) {
+						sliders[i].setWRGB(masterColor);
+					}					
+				}
+				else if (!controls.chase.isSelected()) {
+					//System.out.println("forwarding slider colors");
 					for (int i=sliders.length-1; i>0; i--) {
 						sliders[i].setWRGB(sliders[i-1].getWRGB());
 					}
-					sliders[0].setWRGB(master.getWRGB());
-				}				
+					sliders[0].setWRGB(masterColor);
+				} 
+				
 			}
 		}
 		
@@ -355,36 +364,41 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	
 		boolean toggle = controls.toggle.isSelected();
 		boolean setColor = false;
-		if (src==master.r) {
-			if (toggle && master.r.getValue()>0) {
-				master.g.setValue(0);
-				master.b.setValue(0);				
-				master.w.setValue(0);				
+		if (!controls.sound.isSelected()) {
+			
+			if (src==master.r) {
+				if (toggle && master.r.getValue()>0) {
+					master.g.setValue(0);
+					master.b.setValue(0);				
+					master.w.setValue(0);				
+				}
+				setColor = true;
 			}
-			setColor = true;
-		}
-		if (src==master.g && master.g.getValue()>0) {
-			if (toggle) {
-				master.r.setValue(0);
-				master.b.setValue(0);
-				master.w.setValue(0);				
+			if (src==master.g && master.g.getValue()>0) {
+				if (toggle) {
+					master.r.setValue(0);
+					master.b.setValue(0);
+					master.w.setValue(0);				
+				}
+				setColor = true;
 			}
-			setColor = true;
-		}
-		if (src==master.b && master.b.getValue()>0) {
-			if (toggle) {
-				master.r.setValue(0);
-				master.g.setValue(0);
-				master.w.setValue(0);				
+			if (src==master.b && master.b.getValue()>0) {
+				if (toggle) {
+					master.r.setValue(0);
+					master.g.setValue(0);
+					master.w.setValue(0);				
+				}
+				setColor = true;
 			}
-			setColor = true;
-		}
-		if (src==master.w && master.w.getValue()>0) {
-			if (toggle) {
-				master.r.setValue(0);
-				master.g.setValue(0);
-				master.b.setValue(0);				
+			if (src==master.w && master.w.getValue()>0) {
+				if (toggle) {
+					master.r.setValue(0);
+					master.g.setValue(0);
+					master.b.setValue(0);				
+				}
+				setColor = true;
 			}
+		} else {
 			setColor = true;
 		}
 

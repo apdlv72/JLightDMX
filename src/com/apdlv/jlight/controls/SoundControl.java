@@ -208,7 +208,7 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		Object src = e.getSource();
 		if (algo==src) {
 			String name = (String) algo.getSelectedItem();
-			System.err.println("Algo: " + name);
+			//System.err.println("Algo: " + name);
 			switch (name) {
 			case "VThresh":
 				startVolumeThreshold();

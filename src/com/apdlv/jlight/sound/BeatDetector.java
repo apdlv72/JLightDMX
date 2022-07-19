@@ -30,7 +30,7 @@ public final class BeatDetector {
         averageLoudness = average(neighborLoudnesses);
         beatLoudness = significanceThreshold * averageLoudness;
                 
-        System.err.println("currentLoudness: " + currentLoudness + ", averageLoudness: " + averageLoudness);
+        //System.err.println("currentLoudness: " + currentLoudness + ", averageLoudness: " + averageLoudness);
         meter.setAmplitude(averageLoudness);
         meter.setPeak(currentLoudness);
 

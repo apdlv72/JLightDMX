@@ -75,10 +75,10 @@ public class DamienQuartz extends Thread implements BeatDetectorInterface {
             	meter.setAmplitude(detector.lastLevel);
             }
             
-            System.err.printf("beat: %s\n", beat ? "*" : "");
+           // System.err.printf("beat: %s\n", beat ? "*" : "");
             if (beat != wasBeat) {
 	            for (BeatListener l : listeners) {
-	            	String info = String.format("V:%2.1f S:%2.1f E:%2d %s", 
+	            	String info = String.format("V:%2.1f S:%2.1f E:%3d %s", 
 	            			volumePrescale, detector.sensitivity,
 	            			detector.getEnergyCursor(),
 	            			beat ? "*" : " ");

@@ -117,7 +117,8 @@ public class JLightDMX extends JFrame implements SettingsListener {
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("processPackets: " + e);
+				//System.out.println("processPackets: " + e);
+				e.printStackTrace();
 			}
 		}
 		

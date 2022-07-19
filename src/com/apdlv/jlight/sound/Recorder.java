@@ -149,7 +149,7 @@ public class Recorder extends Thread implements BeatDetectorInterface {
 	}
 
 	public void addBeatListener(BeatListener l) {
-		System.err.println("Recorder: adding listener " + l);
+		//System.err.println("Recorder: adding listener " + l);
 		listeners.add(l);
 	}
 	
