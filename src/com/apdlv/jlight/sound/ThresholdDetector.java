@@ -15,8 +15,9 @@ import javax.sound.sampled.TargetDataLine;
 public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 
 	public static void main(String[] args) throws LineUnavailableException, InterruptedException {
-		ThresholdDetector meter = new ThresholdDetector();
-		meter.run();
+		LevelMeter meter = new LevelMeter(); 
+		ThresholdDetector detector = new ThresholdDetector(meter);
+		detector.run();
 	}
 
 	private TargetDataLine targetDataLine;
@@ -35,7 +36,11 @@ public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 	private volatile boolean shuttingDown = false;
 
 
-	public ThresholdDetector() {
+	private LevelMeter meter;
+
+
+	public ThresholdDetector(LevelMeter meter) {
+		this.meter = meter;
 		try {
 			AudioFormat audioFormat = getAudioFormat();
 			targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
@@ -83,6 +88,7 @@ public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 			
 			double currVolume =  (volumePrescale * max)/32768;
 			//System.out.println("currVolume " + currVolume  + ", lastVolume " + lastVolume + ", volumeThreshold " + volumeThreshold);
+			meter.setAmplitude((float)currVolume);
 			
 			if (currVolume > volumeThreshold) {
 //				if (lastVolume<=volumeThreshold) 
@@ -154,4 +160,6 @@ public class ThresholdDetector extends Thread implements BeatDetectorInterface {
 	}
 	
 	Set<BeatListener> listeners = new HashSet<BeatListener>();
+
+
 }

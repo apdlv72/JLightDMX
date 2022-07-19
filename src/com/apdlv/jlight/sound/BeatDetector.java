@@ -15,6 +15,7 @@ public final class BeatDetector {
     float averageLoudness;
     float beatLoudness;
 	private float volume;
+	private LevelMeter meter;
     
     public BeatDetector(float retentionDuration, float threshold) {
         neighborLoudnesses = new TimedQueue(retentionDuration);
@@ -23,11 +24,15 @@ public final class BeatDetector {
     
     public boolean processBufferAvg(AudioBuffer buffer, StringBuilder sb) {
         
-    	currentLoudness = buffer.level();
+    	currentLoudness = buffer.level();    	
     	currentLoudness = volume * currentLoudness;
         
         averageLoudness = average(neighborLoudnesses);
         beatLoudness = significanceThreshold * averageLoudness;
+                
+        System.err.println("currentLoudness: " + currentLoudness + ", averageLoudness: " + averageLoudness);
+        meter.setAmplitude(averageLoudness);
+        meter.setPeak(currentLoudness);
 
         neighborLoudnesses.add(currentLoudness);
 
@@ -65,5 +70,9 @@ public final class BeatDetector {
 
 	public void setVolume(double v) {
 		this.volume = (float)v;
+	}
+
+	public void setMeter(LevelMeter meter) {
+		this.meter = meter;
 	}
 }

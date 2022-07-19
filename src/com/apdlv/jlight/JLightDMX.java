@@ -53,6 +53,7 @@ import com.apdlv.jlight.controls.Settings.SettingsListener;
 import com.apdlv.jlight.controls.SoundControl;
 import com.apdlv.jlight.dmx.ArtNetLib;
 import com.apdlv.jlight.dmx.DmxPacket;
+import com.apdlv.jlight.sound.LevelControl;
 
 @SuppressWarnings("serial")
 public class JLightDMX extends JFrame implements SettingsListener {
@@ -142,7 +143,10 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		settings = new Settings(this, panel, null, null);
 		settings.addSettingsListener(this);
 		
-		SoundControl sound = new SoundControl();			
+		SoundControl sound = new SoundControl();	
+//		LevelControl sound = new LevelControl();
+//		sound.start();
+		
 		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
