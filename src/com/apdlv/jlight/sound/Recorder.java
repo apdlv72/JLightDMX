@@ -107,7 +107,7 @@ public class Recorder extends Thread implements BeatDetectorInterface {
     	
     	float t = threshold*avgRms;
     	
-    	isOverThreshold = rms > t;
+    	isOverThreshold = rms > t && rms>0.1;
     	boolean isPeakOverT = peak > t;
     	
         boolean beatStart = isOverThreshold && !wasOverThreshold;
