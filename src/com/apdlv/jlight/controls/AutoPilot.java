@@ -24,15 +24,18 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 	private Random rand;
 	private JSlider thres;
 	private JSlider wait;
-	private long lastBeat = -1;
 	private JLabel info;
 	private JLabel time;
-	private JCheckBox master;
-	private JCheckBox chase;
-	private JCheckBox sound;
-	private JCheckBox reverse;
-	private JCheckBox random;
-	private JCheckBox fade;
+//	private JCheckBox master;
+//	private JCheckBox chase;
+//	private JCheckBox sound;
+//	private JCheckBox reverse;
+//	private JCheckBox random;
+//	private JCheckBox fade;
+	private String effect = "-";		
+	private int countdown = -1;
+	private int lastEvent = -1;
+	
 
 	public AutoPilot(RGBWSpotArray spots) {
 		super(new BorderLayout());
@@ -70,13 +73,8 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 	public Insets getInsets() {
 		return new Insets(8, 4, 24, 4);
 	}
-		
-	boolean toggle = false;
-	long lastToggle = System.currentTimeMillis();
-	private String effect = "-";	
 	
-	int countdown = -1;
-	private int lastEvent;
+	private Random r = new Random();
 	
 	public void loop(long count, DmxPacket packet) {
 		
@@ -92,16 +90,13 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 		if (countdown>0) {
 			return;
 		}
-		Random r = new Random();
 
-		System.err.println("countdown");
 		int event = rand.nextInt(8);
 		while (event==this.lastEvent) {
 			event = rand.nextInt(8);
 		}		
 		this.lastEvent = event;
 		
-		toggle = !toggle;
 		effect = "?";
 		switch (event) {
 		case 0:
@@ -113,7 +108,7 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(false);
 			spots.setFade(true);
 			effect = "MusicRGB";
-			countdown = 100 * (thres + r.nextInt(1+thres/2));
+			countdown = 100*thres + r.nextInt(1+50*thres);
 			break;
 		case 2:
 		case 3:
@@ -124,7 +119,7 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(true);
 			spots.setFade(false);
 			effect = "MusicRGBW";
-			countdown = 100 * (thres + r.nextInt(1+thres/2));
+			countdown = 100*thres + r.nextInt(1+50*thres);
 			break;
 		case 4:
 			spots.setMaster(false);
@@ -134,7 +129,7 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(true);
 			spots.setFade(false);
 			effect = "RandChase";
-			countdown = 100 * (thres/4 + r.nextInt(1+thres/8));
+			countdown = 10*thres + r.nextInt(1+10*thres);
 			break;
 		case 5:
 			spots.setMaster(false);
@@ -144,7 +139,7 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(true);
 			spots.setFade(true);
 			effect = "RandFade";
-			countdown = 100 * (thres/4 + r.nextInt(1+thres/8));
+			countdown = 10*thres + r.nextInt(1+10*thres);
 			break;
 		case 6:
 			spots.setRandomColor();
@@ -154,7 +149,7 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(true);
 			spots.setFade(false);
 			effect = "MusicChase";
-			countdown = 100 * (thres/4 + r.nextInt(1+thres/8));
+			countdown = 10*thres + r.nextInt(1+10*thres);
 			break;
 		case 7:
 			spots.setRandomColor();
@@ -164,13 +159,13 @@ public class AutoPilot extends JPanel implements DmxControlInterface, ChangeList
 			spots.setRandom(true);
 			spots.setFade(true);
 			effect = "MusicFade";
-			countdown = 100 * (thres/4 + r.nextInt(1+thres/8));
+			countdown = 10*thres + r.nextInt(1+10*thres);
 			break;
 		default:
-			countdown = 100 * (thres/4 + r.nextInt(1+thres/8));
+			countdown = 10*thres + r.nextInt(1+10*thres);
 			break;
 		}		
-//		System.err.println("effect: " + effect);
+		System.err.println("thres: " + thres + ", effect: " + effect + ", countdown: " + countdown);
 	}
 
 	@Override
