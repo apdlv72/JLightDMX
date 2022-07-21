@@ -65,7 +65,7 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 		}
 	}
 	
-	String options[] = { "VThresh", "BeatDetect", "PeakAvg", "DQuartz", "Off" };
+	String options[] = { "PeakAvg", "VThresh", "BeatDetect", "DQuartz", "Off" };
 	private JComboBox algo;
 	private LevelMeter meter;
 
@@ -121,10 +121,9 @@ public class SoundControl extends JPanel implements ChangeListener, DmxControlIn
 			    startBeatDetect();
 			} 
 			else {
-				startVolumeThreshold();
+				startPeakAverage();				
 			}
 			thread.addBeatListener(this); 
-		    thread.start();
 		}
 		
 		boolean beat = thread.consumeBeat();

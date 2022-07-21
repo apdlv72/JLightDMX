@@ -41,6 +41,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import com.apdlv.jlight.components.SelfMaintainedBackground;
 import com.apdlv.jlight.components.SelfMaintainedForeground;
+import com.apdlv.jlight.controls.AutoPilot;
 import com.apdlv.jlight.controls.ChannelDebug;
 import com.apdlv.jlight.controls.ChannelTest;
 import com.apdlv.jlight.controls.DmxControlInterface;
@@ -149,6 +150,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 //		sound.start();
 		
 		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
+		AutoPilot pilot = new AutoPilot(rgbwSpots);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
 		LaserHead lasers = new LaserHead(ADDR_LASER, 
@@ -164,6 +166,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		
 		addControl(panel, settings);
 		addControl(panel, sound);
+		addControl(panel, pilot);
 		addControl(panel, rgbwSpots);
 		addControl(panel, fogger);
 		addControl(panel, lasers);
@@ -175,6 +178,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		// order matters below because it determines, which control will have it's loop method called first:
 		// sound comes first (for beat detection)
 		controls.add(sound);
+		controls.add(pilot);
 		controls.add(rgbwSpots);
 		controls.add(fogger);
 		//controls.add(spot);

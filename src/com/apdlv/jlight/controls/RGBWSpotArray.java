@@ -247,7 +247,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		if (controls.chase.isSelected()) {
 		
 			int color = master.getWRGB();
-			if (controls.rand.isSelected()) {
+			if (controls.rand.isSelected() && !controls.sound.isSelected()) {
 				if (randomColor<0 || rnd.nextInt(5)==0) {
 					randomColor = createRandomColor(count);
 				}
@@ -411,5 +411,46 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 				}
 			}
 		}
+	}
+
+	public void toggleRandom() {
+		controls.rand.setSelected(!controls.rand.isSelected());
+	}
+
+	public void toggleReverse() {
+		controls.reverse.setSelected(!controls.reverse.isSelected());
+	}
+
+	public void toggleFade() {
+		controls.fade.setSelected(!controls.fade.isSelected());
+	}
+
+	public void setChase(boolean chase) {
+		controls.chase.setSelected(chase);		
+	}
+
+	public void setMaster(boolean value) {
+		master.setSelected(value);		
+	}
+
+	public void setRandom(boolean b) {
+		controls.rand.setSelected(b);
+	}
+
+	public void setReverse(boolean b) {
+		controls.reverse.setSelected(b);
+	}
+
+	public void setFade(boolean b) {
+		controls.fade.setSelected(b);
+	}
+
+	public void setSound(boolean b) {
+		controls.sound.setSelected(b);
+	}
+
+	public void setRandomColor() {
+		int color = rand.nextInt();
+		master.setWRGB(color);
 	}
 }

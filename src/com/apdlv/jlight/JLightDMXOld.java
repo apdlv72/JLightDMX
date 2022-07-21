@@ -19,6 +19,7 @@ import javax.swing.border.Border;
 
 import com.apdlv.jlight.components.SelfMaintainedBackground;
 import com.apdlv.jlight.components.SelfMaintainedForeground;
+import com.apdlv.jlight.controls.AutoPilot;
 import com.apdlv.jlight.controls.ChannelDebug;
 import com.apdlv.jlight.controls.ChannelTest;
 import com.apdlv.jlight.controls.DmxControlInterface;
@@ -76,6 +77,7 @@ public class JLightDMXOld {
 		Settings settings   = new Settings(frame, frame.getContentPane(), debug, channel);
 		SoundControl sound = new SoundControl();
 		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
+		AutoPilot pilot = new AutoPilot(rgbwSpots);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
 		LaserHead lasers = new LaserHead(ADDR_LASER, 
@@ -90,6 +92,7 @@ public class JLightDMXOld {
 
 		Border border = createLineBorder(WHITE);
 		setBorder(sound,border);
+		setBorder(pilot, border);
 		setBorder(rgbwSpots,border);
 		setBorder(fogger,border);
 		//setBorder(spot, border);
@@ -102,6 +105,7 @@ public class JLightDMXOld {
 
 		add(frame, settings);
 		add(frame, sound);
+		add(frame, pilot);
 		add(frame, rgbwSpots);
 		add(frame, fogger);
 		add(frame, lasers);
