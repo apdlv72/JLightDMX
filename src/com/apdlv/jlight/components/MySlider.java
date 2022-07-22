@@ -13,6 +13,12 @@ class MySlider extends JSlider {
 		setUI(new MyUi());
 	}
 	
+	public MySlider(int min, int max, int value) {
+		this("", JSlider.VERTICAL, min, max, value);
+		this.name = name;
+		setUI(new MyUi());
+	}
+	
 	public String getName() {
 		return name;
 	}

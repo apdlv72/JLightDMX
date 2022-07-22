@@ -15,6 +15,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.apdlv.jlight.components.ColorSlider;
+import com.apdlv.jlight.components.MySlider;
 
 @SuppressWarnings("serial")
 public class RGBWSliders extends JPanel implements ChangeListener {
@@ -27,6 +28,10 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 	private JCheckBox check;
 
 	public RGBWSliders(String name) {
+		this(name, null);
+	}
+
+	public RGBWSliders(String name, MySlider dimmer) {
 
 		JPanel sliderPanel = new JPanel();
 
@@ -39,6 +44,9 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 //		b.setBackground(BLUE.darker());
 //		w.setBackground(WHITE);
 
+		if (null!=dimmer) {
+			sliderPanel.add(dimmer);	
+		}
 		sliderPanel.add(r);
 		sliderPanel.add(g);
 		sliderPanel.add(b);
@@ -69,7 +77,13 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 	}
 
 	public int getWRGB() {
-		return (w.getValue() << 24) | (r.getValue() << 16) | (g.getValue() << 8) | b.getValue();
+		int wv = (w.getValue() << 24);
+		int rv = (r.getValue() << 16);
+		int gv = (g.getValue() << 8);
+		int bv = b.getValue();
+		int wrgb = wv | rv | gv | bv;
+		//System.err.println("getWRGB: wrgb: " + wrgb + ", r: " + rv + ", g: " + gv + ", b: " + bv + ", w: " + wv);
+		return wrgb;
 	}
 
 	public boolean isSelected() {

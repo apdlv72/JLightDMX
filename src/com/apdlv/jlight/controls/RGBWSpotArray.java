@@ -19,6 +19,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.apdlv.jlight.components.LabeledPanel;
 import com.apdlv.jlight.components.MySlider;
 import com.apdlv.jlight.components.MyUi;
 import com.apdlv.jlight.dmx.DmxPacket;
@@ -147,7 +148,8 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		}
 	}
 
-	int rainbow[]; 
+	int rainbow[];
+	private MySlider dimmer; 
 
 	public RGBWSpotArray(int dmxAddr, int strobeAddr, int count) {
 
@@ -160,12 +162,14 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		setBorder(BorderFactory.createLineBorder(Color.black));
 		
 		sliders = new RGBWSliders[count];
-		master = new RGBWSliders("Master");
+		dimmer = new MySlider(0, 255, 255);
+		master = new RGBWSliders("Master", dimmer);
 		master.addChangeListener(this);		
 		controls = new Controls();
 //		controls2 = new Controls2();
 		
 		add(controls);
+		//add(new LabeledPanel(new JLabel("Dim"), dimmer));
 		add(master);
 		add(new JLabel("→"));
 		for (int i = 0; i < count; i++) {
@@ -294,7 +298,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			int index = dmxAddr + 8*i;
 			//System.err.println("Slider " + i + ": index=" + index);
 			
-			packet.data[index+0] = (byte)0xff; // ch1: total dimming
+			packet.data[index+0] = (byte)dimmer.getValue();
 			packet.data[index+1] = r; 
 			packet.data[index+2] = g; 
 			packet.data[index+3] = b; 

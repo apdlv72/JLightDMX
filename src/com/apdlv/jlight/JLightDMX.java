@@ -48,6 +48,7 @@ import com.apdlv.jlight.controls.DmxControlInterface;
 import com.apdlv.jlight.controls.FogMachine;
 import com.apdlv.jlight.controls.LaserHead;
 import com.apdlv.jlight.controls.MovingHead;
+import com.apdlv.jlight.controls.RGBWAUSpotArray;
 import com.apdlv.jlight.controls.RGBWSpotArray;
 import com.apdlv.jlight.controls.Settings;
 import com.apdlv.jlight.controls.Settings.SettingsListener;
@@ -60,6 +61,7 @@ import com.apdlv.jlight.sound.LevelControl;
 public class JLightDMX extends JFrame implements SettingsListener {
 	
 	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
+	private static final int ADDR_RGBWAU_SPOTS = 100;
 	
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_LASER = 255;
@@ -150,6 +152,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 //		sound.start();
 		
 		RGBWSpotArray rgbwSpots = new RGBWSpotArray(ADDR_RGBW_SPOTS, 200, 4);
+		RGBWAUSpotArray rgbwauSpots = new RGBWAUSpotArray(ADDR_RGBWAU_SPOTS, rgbwSpots); 
 		AutoPilot pilot = new AutoPilot(rgbwSpots);
 		FogMachine fogger = new FogMachine(ADDR_FOGGER);
 		// RGBWSpot spot = new RGBWSpot(ADDR_RGBW_SPOTS2, "Master", "Red", "Green", "Blue", "White", "Prgrm", "Flash");
@@ -168,6 +171,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		addControl(panel, sound);
 		addControl(panel, pilot);
 		addControl(panel, rgbwSpots);
+		addControl(panel, rgbwauSpots);		
 		addControl(panel, fogger);
 		addControl(panel, lasers);
 		//addControl(panel, spot);
@@ -180,6 +184,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		controls.add(sound);
 		controls.add(pilot);
 		controls.add(rgbwSpots);
+		controls.add(rgbwauSpots);
 		controls.add(fogger);
 		//controls.add(spot);
 		controls.add(moving);

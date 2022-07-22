@@ -14,23 +14,38 @@ class ColorSlider extends MySlider /* implements SelfMaintainedBackground*/ {
 
 	public ColorSlider(Color color, String name, int orient, int min, int max, int val) {
 		super(name, orient, min, max, val);
-		BasicSliderUI ui = new coloredThumbSliderUI(this, color);
+		BasicSliderUI ui = new ColoredThumbSliderUI(this, color);
 		super.setUI(ui);
 	}	
 
+	public ColorSlider(Color color, int min, int max, int val) {
+		this(color, "", JSlider.VERTICAL, min, max, val);
+	}	
+
+
 	public ColorSlider(String name, int orient, int min, int max, int val) {
-		super(name, orient, min, max, val);
-//		BasicSliderUI ui = new coloredThumbSliderUI(this, Color.red);
-//		super.setUI(ui);
+		this(Color.BLACK, name, orient, min, max, val);
 	}	
 	
-	class coloredThumbSliderUI extends BasicSliderUI {
+	class ColoredThumbSliderUI extends BasicSliderUI {
 	 
 	    Color thumbColor;
-	    coloredThumbSliderUI(JSlider s, Color tColor) {
+	    ColoredThumbSliderUI(JSlider s, Color tColor) {
 	        super(s);
 	        thumbColor=tColor;
 	    }
+	    
+		protected void scrollDueToClickInTrack(int direction) {
+			int value = slider.getValue();
+
+			if (slider.getOrientation() == JSlider.HORIZONTAL) {
+				value = this.valueForXPosition(slider.getMousePosition().x);
+			} else if (slider.getOrientation() == JSlider.VERTICAL) {
+				value = this.valueForYPosition(slider.getMousePosition().y);
+			}
+			slider.setValue(value);
+		}
+
 	 
 	    public void paint( Graphics g, JComponent c ) {
 	        recalculateIfInsetsChanged();
