@@ -61,7 +61,7 @@ import com.apdlv.jlight.sound.LevelControl;
 public class JLightDMX extends JFrame implements SettingsListener {
 	
 	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
-	private static final int ADDR_RGBWAU_SPOTS = 100;
+	private static final int ADDR_RGBWAU_SPOTS = 100-2;
 	
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_LASER = 255;

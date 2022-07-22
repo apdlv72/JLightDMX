@@ -124,31 +124,33 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 			toggle(cbUV, uv);
 		}
 		
-		packet.data[dmxAddr   +0] = (byte)dimmer.getValue();
-		packet.data[dmxAddr+10+0] = (byte)dimmer.getValue();
+		int ofs1 =  0;
+		int ofs2 = 10;
+		//packet.data[dmxAddr   +0] = (byte)dimmer.getValue();
+		//packet.data[dmxAddr+10+0] = (byte)dimmer.getValue();
 		
 		if (null!=linked && link.isSelected()) {
 			RGBWSliders src1 = linked.sliders[0];
 			RGBWSliders src2 = linked.sliders[2];
-			copyRGBW(src1, packet,  0);
-			copyRGBW(src2, packet, 10);
+			copyRGBW(src1, packet, ofs1);
+			copyRGBW(src2, packet, ofs2);
 		} else {
-			packet.data[dmxAddr   +1] = (byte)red.getValue();
-			packet.data[dmxAddr   +2] = (byte)green.getValue();
-			packet.data[dmxAddr   +3] = (byte)blue.getValue();
-			packet.data[dmxAddr   +4] = (byte)cold.getValue();			
+			packet.data[dmxAddr+ofs1+1] = (byte)red.getValue();
+			packet.data[dmxAddr+ofs1+2] = (byte)green.getValue();
+			packet.data[dmxAddr+ofs1+3] = (byte)blue.getValue();
+			packet.data[dmxAddr+ofs1+4] = (byte)cold.getValue();			
 			
-			packet.data[dmxAddr+10+1] = (byte)red.getValue();
-			packet.data[dmxAddr+10+2] = (byte)green.getValue();
-			packet.data[dmxAddr+10+3] = (byte)blue.getValue();
-			packet.data[dmxAddr+10+4] = (byte)cold.getValue();			
+			packet.data[dmxAddr+ofs2+1] = (byte)red.getValue();
+			packet.data[dmxAddr+ofs2+2] = (byte)green.getValue();
+			packet.data[dmxAddr+ofs2+3] = (byte)blue.getValue();
+			packet.data[dmxAddr+ofs2+4] = (byte)cold.getValue();			
 		}
 		
-		packet.data[dmxAddr   +5] = (byte)warm.getValue();		
-		packet.data[dmxAddr   +6] = (byte)uv.getValue();
+		packet.data[dmxAddr+ofs1+5] = (byte)warm.getValue();		
+		packet.data[dmxAddr+ofs1+6] = (byte)uv.getValue();
 		
-		packet.data[dmxAddr+10+5] = (byte)warm.getValue();		
-		packet.data[dmxAddr+10+6] = (byte)uv.getValue();
+		packet.data[dmxAddr+ofs2+5] = (byte)warm.getValue();		
+		packet.data[dmxAddr+ofs2+6] = (byte)uv.getValue();
 	}
 
 	private void copyRGBW(RGBWSliders src, DmxPacket packet, int offs) {
