@@ -103,7 +103,7 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 	public void loop(long count, DmxPacket packet) {
 		
 		if (null!=linked && link.isSelected()) {
-			RGBWSliders master = linked.master;
+			RGBWSliders master = linked.sliders[0];
 			int wrgb = master.getWRGB();
 			int w = (wrgb >> 24) & 0xff;
 			int r = (wrgb >> 16) & 0xff;
