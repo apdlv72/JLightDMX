@@ -72,8 +72,8 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		warm   = new ColorSlider(ORANGE.brighter().brighter().brighter().brighter(), 0, 255, 0);
 		uv = new ColorSlider(MAGENTA.brighter().brighter().brighter(), 0, 255, 255);
 
-		add(new LabeledPanel(link = new JCheckBox("Link"), dimmer));
-		add(new LabeledPanel(dim  =  new JButton("Dim"), dimmer));
+		add(link = new JCheckBox("Link"));
+		//add(new LabeledPanel(dim  =  new JButton("Dim"), dimmer));
 		add(new LabeledPanel(cbRed   = new JCheckBox(""), red));
 		add(new LabeledPanel(cbGreen = new JCheckBox(""), green));
 		add(new LabeledPanel(cbBlue  = new JCheckBox(""), blue));
