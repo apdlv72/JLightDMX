@@ -109,7 +109,6 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 			int r = (wrgb >> 16) & 0xff;
 			int g = (wrgb >>  8) & 0xff;
 			int b = (wrgb >>  0) & 0xff;
-			//System.err.println("First: " + wrgb + ", r: " + r + ", g: " + g + ", b: " + b + ", w: " + w);
 			red.setValue(r);
 			green.setValue(g);
 			blue.setValue(b);
@@ -125,13 +124,43 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 			toggle(cbUV, uv);
 		}
 		
-		packet.data[dmxAddr+0] = (byte)dimmer.getValue();
-		packet.data[dmxAddr+1] = (byte)red.getValue();
-		packet.data[dmxAddr+2] = (byte)green.getValue();
-		packet.data[dmxAddr+3] = (byte)blue.getValue();
-		packet.data[dmxAddr+4] = (byte)cold.getValue();
-		packet.data[dmxAddr+5] = (byte)warm.getValue();		
-		packet.data[dmxAddr+6] = (byte)uv.getValue();		
+		packet.data[dmxAddr   +0] = (byte)dimmer.getValue();
+		packet.data[dmxAddr+10+0] = (byte)dimmer.getValue();
+		
+		if (null!=linked && link.isSelected()) {
+			RGBWSliders src1 = linked.sliders[0];
+			RGBWSliders src2 = linked.sliders[2];
+			copyRGBW(src1, packet,  0);
+			copyRGBW(src2, packet, 10);
+		} else {
+			packet.data[dmxAddr   +1] = (byte)red.getValue();
+			packet.data[dmxAddr   +2] = (byte)green.getValue();
+			packet.data[dmxAddr   +3] = (byte)blue.getValue();
+			packet.data[dmxAddr   +4] = (byte)cold.getValue();			
+			
+			packet.data[dmxAddr+10+1] = (byte)red.getValue();
+			packet.data[dmxAddr+10+2] = (byte)green.getValue();
+			packet.data[dmxAddr+10+3] = (byte)blue.getValue();
+			packet.data[dmxAddr+10+4] = (byte)cold.getValue();			
+		}
+		
+		packet.data[dmxAddr   +5] = (byte)warm.getValue();		
+		packet.data[dmxAddr   +6] = (byte)uv.getValue();
+		
+		packet.data[dmxAddr+10+5] = (byte)warm.getValue();		
+		packet.data[dmxAddr+10+6] = (byte)uv.getValue();
+	}
+
+	private void copyRGBW(RGBWSliders src, DmxPacket packet, int offs) {
+		int wrgb = src.getWRGB();
+		int w = (wrgb >> 24) & 0xff;
+		int r = (wrgb >> 16) & 0xff;
+		int g = (wrgb >>  8) & 0xff;
+		int b = (wrgb >>  0) & 0xff;
+		packet.data[dmxAddr+offs+1] = (byte)r;
+		packet.data[dmxAddr+offs+2] = (byte)g;
+		packet.data[dmxAddr+offs+3] = (byte)b;
+		packet.data[dmxAddr+offs+4] = (byte)w;
 	}
 
     private void toggle(JCheckBox cb, ColorSlider cs) {
