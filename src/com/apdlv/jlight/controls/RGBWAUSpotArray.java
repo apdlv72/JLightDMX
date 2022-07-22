@@ -74,6 +74,7 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 
 		add(link = new JCheckBox("Link"));
 		//add(new LabeledPanel(dim  =  new JButton("Dim"), dimmer));
+		//dim.addMouseListener(this);
 		add(new LabeledPanel(cbRed   = new JCheckBox(""), red));
 		add(new LabeledPanel(cbGreen = new JCheckBox(""), green));
 		add(new LabeledPanel(cbBlue  = new JCheckBox(""), blue));
@@ -81,7 +82,6 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		add(new LabeledPanel(cbWarm  = new JCheckBox(""), warm));
 		add(new LabeledPanel(cbUV    = new JCheckBox(""), uv));
 		
-		dim.addMouseListener(this);
 	}
 	
 	Random rand = new Random();
