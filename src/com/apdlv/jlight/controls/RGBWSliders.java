@@ -26,12 +26,21 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 	JSlider w;
 	ChangeListener listener;
 	private JCheckBox check;
+	private boolean suppressToggle;
 
 	public RGBWSliders(String name) {
 		this(name, null);
 	}
 
+	public RGBWSliders(String name, boolean withWhite) {
+		this(name, null, withWhite);
+	}
+
 	public RGBWSliders(String name, MySlider dimmer) {
+		this(name, dimmer, true);
+	}
+
+	public RGBWSliders(String name, MySlider dimmer, boolean witWhite) {
 
 		JPanel sliderPanel = new JPanel();
 
@@ -50,12 +59,15 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 		sliderPanel.add(r);
 		sliderPanel.add(g);
 		sliderPanel.add(b);
-		sliderPanel.add(w);
 
 		r.addChangeListener(this);
 		g.addChangeListener(this);
 		b.addChangeListener(this);
-		w.addChangeListener(this);
+
+		if (witWhite) {
+			sliderPanel.add(w);
+			w.addChangeListener(this);
+		}
 
 		setLayout(new BorderLayout());
 		check = new JCheckBox(name);
@@ -63,6 +75,11 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 
 		add(check, BorderLayout.NORTH);
 		add(sliderPanel, BorderLayout.CENTER);
+	}
+	
+	@Override
+	public void setToolTipText(String text) {
+		check.setToolTipText(text);
 	}
 
 	@Override
@@ -91,7 +108,11 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 	}
 
 	public void setWRGB(int wrgb) {
-		w.setValue((wrgb >> 24) & 0xff);
+		int wv = (wrgb >> 24) & 0xff;
+		int wr = (wrgb >> 24) & 0xff;
+		int wg = (wrgb >> 24) & 0xff;
+		int wb = (wrgb >> 24) & 0xff;
+		w.setValue(wv);
 		r.setValue((wrgb >> 16) & 0xff);
 		g.setValue((wrgb >>  8) & 0xff);
 		b.setValue((wrgb >>  0) & 0xff);
@@ -121,5 +142,9 @@ public class RGBWSliders extends JPanel implements ChangeListener {
 
 	public boolean isDark() {
 		return r.getValue()<1 && g.getValue()<1 && b.getValue()<1 && w.getValue()<1;
+	}
+
+	public JCheckBox getCheck() {
+		return this.check;
 	}
 }

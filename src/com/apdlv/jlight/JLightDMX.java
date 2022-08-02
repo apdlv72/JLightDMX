@@ -47,6 +47,7 @@ import com.apdlv.jlight.controls.ChannelTest;
 import com.apdlv.jlight.controls.DmxControlInterface;
 import com.apdlv.jlight.controls.FogMachine;
 import com.apdlv.jlight.controls.LaserHead;
+import com.apdlv.jlight.controls.LightBar;
 import com.apdlv.jlight.controls.MovingHead;
 import com.apdlv.jlight.controls.RGBWAUSpotArray;
 import com.apdlv.jlight.controls.RGBWSpotArray;
@@ -55,18 +56,17 @@ import com.apdlv.jlight.controls.Settings.SettingsListener;
 import com.apdlv.jlight.controls.SoundControl;
 import com.apdlv.jlight.dmx.ArtNetLib;
 import com.apdlv.jlight.dmx.DmxPacket;
-import com.apdlv.jlight.sound.LevelControl;
 
 @SuppressWarnings("serial")
 public class JLightDMX extends JFrame implements SettingsListener {
 	
-	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63
-	private static final int ADDR_RGBWAU_SPOTS = 100-2;
-	
+	private static final int ADDR_RGBW_SPOTS = 64-1; // ch 64 -> index 63. 4 spots -> till 96
+	private static final int ADDR_RGBWAU_SPOTS = 100-2;	
 	private static final int ADDR_FOGGER = 128; // channel 129
+	private static final int ADDR_STROBE = 200;
 	private static final int ADDR_LASER = 255;
 	private static final int ADDR_MOVING1 = 300-1; // channels 300 - 311
-	//private static final int ADDR_MOVING2 = 320-1; // channel 320 - 331
+	private static final int ADDR_LIGHTBAR = 210-1; // channels 210 - 221
 
 	Settings settings;
 
@@ -99,6 +99,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		String last = "";
 		while (true) {
 			try {
+				packet.clear();
 				packet.setLoopCount(loopCount++);				
 				for (DmxControlInterface control : controls) {				
 					control.loop(loopCount, packet);
@@ -163,6 +164,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 				"Y-Pos", 
 				"Speed" // Inverse - 255 is slowest 
 				); 
+		LightBar lightbar = new LightBar(ADDR_LIGHTBAR, ADDR_STROBE, rgbwSpots);
 		MovingHead moving  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
 		channelDebugControl = new ChannelDebug();
 		channelTestControl = new ChannelTest();
@@ -172,6 +174,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		addControl(panel, pilot);
 		addControl(panel, rgbwSpots);
 		addControl(panel, rgbwauSpots);		
+		addControl(panel, lightbar);
 		addControl(panel, fogger);
 		addControl(panel, lasers);
 		//addControl(panel, spot);
@@ -185,6 +188,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 		controls.add(pilot);
 		controls.add(rgbwSpots);
 		controls.add(rgbwauSpots);
+		controls.add(lightbar);
 		controls.add(fogger);
 		//controls.add(spot);
 		controls.add(moving);

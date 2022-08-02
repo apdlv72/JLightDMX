@@ -1,5 +1,7 @@
 package com.apdlv.jlight.dmx;
 
+import java.util.Arrays;
+
 public class DmxPacket {
 	public byte[] data  = new byte[512];
 	private boolean beat;
@@ -29,5 +31,12 @@ public class DmxPacket {
 
 	public long getLoopCount() {
 		return loopCount;
+	}
+
+	public void clear() {
+		for (int i=0; i<512; i++) {
+			data[i] = 0;
+		}
+		
 	}	
 }

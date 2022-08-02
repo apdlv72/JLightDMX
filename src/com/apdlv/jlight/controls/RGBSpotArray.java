@@ -34,15 +34,43 @@ import com.apdlv.jlight.dmx.DmxPacket;
 @SuppressWarnings("serial")
 public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlInterface {
 
-	private int dmxAddr;
+	protected int dmxAddr;
 	private int strobeAddr;
-	Controls controls;
-	RGBSliders master;
-	RGBSliders sliders[];
-	int index;
+	private int index;
+	private RGBSliders master;
+	private RGBSliders sliders[];
+	private Controls controls;
 	private Controls2 controls2;
+	protected boolean enableStrobe;
 
-	@Override
+	public RGBSpotArray(int dmxAddr, int strobeAddr, int count) {
+
+		this.dmxAddr = dmxAddr;
+		this.strobeAddr = strobeAddr;
+		
+		rainbow = computeRainbow(256);
+		
+		setLayout(new FlowLayout());
+		setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		sliders = new RGBSliders[count];
+		master = new RGBSliders("Master");
+		master.addChangeListener(this);		
+		controls = new Controls();
+		controls2 = new Controls2();
+		
+		add(controls);
+		add(master);
+		add(new JLabel("→"));
+		for (int i = 0; i < count; i++) {
+			sliders[i] = new RGBSliders("" + (i + 1));
+			add(sliders[i]);
+		}
+		add(controls2);
+		
+		enableStrobe = true;
+	}
+
 	public Insets getInsets() {
 		return new Insets(0, 10, 0, 10);
 	}
@@ -62,7 +90,8 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 		private JButton green;
 		private JButton low;
 		private JButton off;
-		private JButton plus, minus;
+		private JButton plus;
+		private JButton minus;
 
 		public Controls2() {
 			setLayout(new GridLayout(7,1));
@@ -147,13 +176,14 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 		JCheckBox rand;
 		JCheckBox fade;
 		JSlider speed;
-		JSlider strobe;
+		JSlider strobeSlider;
 		JCheckBox toggle;
 		private boolean chaseWasSelected;
 		private JButton strobeButton;
 		private JButton speedButton;
 
 		public Controls() {
+			
 			setLayout(new GridLayout(10, 1));
 			
 			toggle = new JCheckBox("Toggle");
@@ -164,9 +194,9 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 			add(speed = new MySlider("Speed", HORIZONTAL, 1, 20, 10));
 			add(strobeButton = newButton("Strobe:"));
 			
-			add(strobe = new JSlider(0, 210));
-			strobe.setUI(new MyUi());
-			strobe.setValue(0);
+			add(strobeSlider = new JSlider(0, 210));
+			strobeSlider.setUI(new MyUi());
+			strobeSlider.setValue(0);
 			add(chase = new JCheckBox("Chase"));
 			add(all = new JCheckBox("All"));
 			add(reverse = new JCheckBox("Reverse"));
@@ -180,7 +210,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 			rand.addChangeListener(this);
 			reverse.addChangeListener(this);
 			fade.addChangeListener(this);
-			strobe.addChangeListener(this);
+			strobeSlider.addChangeListener(this);
 		}
 		
 		private JButton newButton(String name) {
@@ -226,7 +256,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 		public void mousePressed(MouseEvent e) {
 			Object s = e.getSource();
 			if (s==strobeButton) {
-				strobe.setValue(strobe.getMaximum()-1);
+				strobeSlider.setValue(strobeSlider.getMaximum()-1);
 			} else if (s==speedButton) {
 				speed.setValue(speed.getMaximum()-1);
 				chase.setSelected(true);
@@ -240,7 +270,7 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 		public void mouseReleased(MouseEvent e) {
 			Object s = e.getSource();
 			if (s==strobeButton) {
-				strobe.setValue(strobe.getMinimum());
+				strobeSlider.setValue(strobeSlider.getMinimum());
 			} else if (s==speedButton) {
 				speed.setValue(speed.getMinimum());
 				chase.setSelected(false);
@@ -249,32 +279,6 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 	}
 
 	int rainbow[]; 
-
-	public RGBSpotArray(int dmxAddr, int strobeAddr, int count) {
-
-		this.dmxAddr = dmxAddr;
-		this.strobeAddr = strobeAddr;
-		
-		rainbow = computeRainbow(256);
-		
-		setLayout(new FlowLayout());
-		setBorder(BorderFactory.createLineBorder(Color.black));
-		
-		sliders = new RGBSliders[count];
-		master = new RGBSliders("Master");
-		master.addChangeListener(this);		
-		controls = new Controls();
-		controls2 = new Controls2();
-		
-		add(controls);
-		add(master);
-		add(new JLabel("→"));
-		for (int i = 0; i < count; i++) {
-			sliders[i] = new RGBSliders("" + (i + 1));
-			add(sliders[i]);
-		}
-		add(controls2);
-	}
 
 	public void loop(long count, DmxPacket packet) {
 		int len = sliders.length; // sliders.length;
@@ -331,8 +335,8 @@ public class RGBSpotArray extends JPanel implements ChangeListener, DmxControlIn
 			packet.data[index+1] = g; 
 			packet.data[index+2] = b; 
 		}
-		if (strobeAddr>-1) {
-			packet.data[strobeAddr-1] = (byte) (controls.strobe.getValue() & 0xff);
+		if (strobeAddr>-1 && enableStrobe) {
+			packet.data[strobeAddr-1] = (byte) (controls.strobeSlider.getValue() & 0xff);
 		}
 	}
 

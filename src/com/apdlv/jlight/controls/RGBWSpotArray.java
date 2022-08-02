@@ -19,59 +19,98 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.apdlv.jlight.components.LabeledPanel;
 import com.apdlv.jlight.components.MySlider;
 import com.apdlv.jlight.components.MyUi;
 import com.apdlv.jlight.dmx.DmxPacket;
 
 @SuppressWarnings("serial")
 public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlInterface {
+	
+	enum MODE {
+		RGB,      // 12ch light bar: 4 x (r, g, b)
+		RGBMS,    // 5ch light bar: r, g, b, master, strobe
+		RGBWMSPS, // common china par spot: R, G, B, White, Strobe, Master, Program, Speed
+	}
 
-	private int dmxAddr;
+	protected int dmxAddr;
+	protected RGBWSliders sliders[];
+	protected boolean enableStrobe;
+
 	private int strobeAddr;
-	Controls controls;
-	RGBWSliders master;
-	RGBWSliders sliders[];
-	int index;
-//	private Controls2 controls2;
+	private Controls controls;
+	private RGBWSliders master;
+	private int index;
+	private int lastIndex = 0;
+
 
 	@Override
 	public Insets getInsets() {
 		return new Insets(0, 10, 0, 0);
 	}
 	
+	private Integer beforeStrobeValue;
+
 	class Controls extends JPanel implements ChangeListener, MouseListener {
-		JCheckBox sound;
-		JCheckBox chase;
-		JCheckBox reverse;
-		JCheckBox rand;
-		JCheckBox fade;
-		JSlider speed;
-		JSlider strobe;
-		JCheckBox toggle;
+		private JCheckBox sound;
+		private JCheckBox chase;
+		private JCheckBox reverse;
+		private JCheckBox rand;
+		private JCheckBox fade;
+		private JSlider speed;
+		private JSlider strobe;
+		private JCheckBox toggle;
 		private boolean chaseWasSelected;
 		private JButton strobeButton;
+		private JButton wStrobeButton;
 		private JButton speedButton;
 
-		public Controls() {
+		public Controls(boolean enableStrobe) {
 			setLayout(new GridLayout(10, 1));
 			
 			toggle = new JCheckBox("Toggle");
 			toggle.setSelected(true);
+			toggle.setToolTipText("Reset any other channels when changing value");
 			add(toggle);
 			
 			add(speedButton = newButton("Speed:"));
-			add(speed = new MySlider("Speed", HORIZONTAL, 1, 20, 10));
-			add(strobeButton = newButton("Strobe:"));
+			speedButton.setToolTipText("Temporarily enable full speed chase");
 			
-			add(strobe = new JSlider(0, 210));
-			strobe.setUI(new MyUi());
-			strobe.setValue(0);
+			add(speed = new MySlider("Speed", HORIZONTAL, 1, 20, 10));
+			speed.setToolTipText("Set chase speed");
+			
+			if (enableStrobe) {
+				strobeButton = newButton("Strobe:");
+				strobeButton.setToolTipText("Temorarily switch on full speed strobe");
+				
+				wStrobeButton = newButton("WStrobe:");
+				JPanel strobeButtons = new JPanel(new FlowLayout(0,0,0));
+				strobeButtons.setBorder(BorderFactory.createEmptyBorder());
+				strobeButtons.add(strobeButton);
+				strobeButtons.add(wStrobeButton);
+				add(strobeButtons);
+				
+				wStrobeButton.setToolTipText("Temorary full speed white strobe");
+				wStrobeButton.addMouseListener(this);
+				
+				add(strobe = new JSlider(0, 210, 0));
+				strobe.setToolTipText("Set strobe speed");
+				strobe.setUI(new MyUi());
+			}
+			
 			add(chase = new JCheckBox("Chase"));
+			chase.setToolTipText("Round robin chase effect");
+			
 			add(sound = new JCheckBox("Sound"));
+			sound.setToolTipText("Enable sound activated mode");
+			
 			add(reverse = new JCheckBox("Reverse"));
+			reverse.setToolTipText("Reverse chase direction");
+			
 			add(rand = new JCheckBox("Random"));
+			rand.setToolTipText("Use random colors rather than master value");
+			
 			add(fade = new JCheckBox("Fade"));
+			fade.setToolTipText("Set previous/next spot to faded value of curent one");
 
 			speed.addChangeListener(this);
 			chase.addChangeListener(this);
@@ -80,7 +119,9 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			rand.addChangeListener(this);
 			reverse.addChangeListener(this);
 			fade.addChangeListener(this);
-			strobe.addChangeListener(this);
+			if (enableStrobe) {
+				strobe.addChangeListener(this);
+			}
 		}
 		
 		private JButton newButton(String name) {
@@ -125,13 +166,21 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		@Override
 		public void mousePressed(MouseEvent e) {
 			Object s = e.getSource();
+			int max = strobe.getMaximum()-1;
 			if (s==strobeButton) {
-				strobe.setValue(strobe.getMaximum()-1);
+				strobe.setValue(max);
 			} else if (s==speedButton) {
 				speed.setValue(speed.getMaximum()-1);
 				chase.setSelected(true);
 				if (master.isDark()) {
 					rand.setSelected(true);
+				}
+			} else if (s == wStrobeButton) {
+				strobe.setValue(max);
+				if (null==beforeStrobeValue) {
+					beforeStrobeValue = master.getWRGB();
+					//System.out.println("Value before strobing: " + beforeStrobeValue);
+					master.setWRGB(0xffffffff);
 				}
 			}
 		}
@@ -139,22 +188,58 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			Object s = e.getSource();
+			int min = strobe.getMinimum();
 			if (s==strobeButton) {
-				strobe.setValue(strobe.getMinimum());
+				strobe.setValue(min);
 			} else if (s==speedButton) {
 				speed.setValue(speed.getMinimum());
 				chase.setSelected(false);
+			} else if (s == wStrobeButton) {
+				strobe.setValue(min);
+				if (null!=beforeStrobeValue) {
+					master.setWRGB(beforeStrobeValue);				
+					beforeStrobeValue = null;
+				}
 			}
+		}
+
+		private void sysout(String string) {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 
 	int rainbow[];
-	private MySlider dimmer; 
+	private MySlider dimmer;
+	private int channels;
+	private MODE mode;
+	private RGBWSpotArray linked;
+	private JCheckBox link;
+	private JCheckBox masterCheck; 
 
 	public RGBWSpotArray(int dmxAddr, int strobeAddr, int count) {
+		this(dmxAddr, strobeAddr, count, MODE.RGBWMSPS, null,  true);
+	}
+	
+	public RGBWSpotArray(int dmxAddr, int strobeAddr, int count, MODE mode, RGBWSpotArray linked, boolean enableStrobe) {
+		
+		this.mode = mode;
+		switch (this.mode) {
+			case RGBWMSPS:
+				channels = 8;
+				break;
+			case RGBMS:
+				channels = 5;
+				break;
+			case RGB:
+				channels = 3;
+				break;
+		}
 
 		this.dmxAddr = dmxAddr;
 		this.strobeAddr = strobeAddr;
+		this.linked = linked;
+		this.enableStrobe = enableStrobe;
 		
 		rainbow = computeRainbow(256);
 		
@@ -163,17 +248,27 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		
 		sliders = new RGBWSliders[count];
 		dimmer = new MySlider(0, 255, 255);
-		master = new RGBWSliders("Master", dimmer);
-		master.addChangeListener(this);		
-		controls = new Controls();
-//		controls2 = new Controls2();
+		
+		boolean withWhite = true;
+		if (mode==MODE.RGB) {
+			withWhite = false;
+		}
+		
+		if (null!=linked) {
+			add(link = new JCheckBox("Link"));
+		}
+		master = new RGBWSliders("Master", dimmer, withWhite);
+		master.setToolTipText("Let master control all spots");
+		master.addChangeListener(this);
+		masterCheck = master.getCheck();
+		controls = new Controls(enableStrobe);
 		
 		add(controls);
 		//add(new LabeledPanel(new JLabel("Dim"), dimmer));
 		add(master);
 		add(new JLabel("→"));
 		for (int i = 0; i < count; i++) {
-			sliders[i] = new RGBWSliders("" + (i + 1));
+			sliders[i] = new RGBWSliders("" + (i + 1), withWhite);
 			add(sliders[i]);
 		}
 //		add(controls2);
@@ -193,11 +288,20 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			0b0001, 
 	};
 	
-	int lastIndex = 0;
-
 	public void loop(long count, DmxPacket packet) {
 		int len = sliders.length; // sliders.length;
 		
+		if (null!=linked && link.isSelected()) {
+			int srcIdx = 0;			
+			int srcLen = linked.sliders.length;
+			for (RGBWSliders target : this.sliders) {
+				RGBWSliders source = linked.sliders[srcIdx % srcLen];
+				int wrgb = source.getWRGB();
+				target.setWRGB(wrgb);
+				srcIdx++;
+			}
+		}
+
 		if (packet.isBeat()) {
 			if (controls.sound.isSelected()) {
 				
@@ -243,9 +347,6 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			}
 		}
 		
-//		if (!controls.all.isSelected()) {
-//			len -= 1;
-//		}
 		int speed = controls.speed.getMinimum()+(controls.speed.getMaximum()-controls.speed.getValue());
 		
 		if (controls.chase.isSelected()) {
@@ -286,29 +387,54 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 			}
 		}
 		
+		int  dimi = dimmer.getValue();
+		byte dimb = (byte)dimi;
+				
 		for (int i=0; i<sliders.length; i++) {
 			
 			int rgb = sliders[i].getWRGB();
 			
+			int ri = ((rgb >> 16) & 0xff);
+			int gi = ((rgb >>  8) & 0xff);
+			int bi = ((rgb >>  0) & 0xff);
+			
 			byte w = (byte) ((rgb >> 24) & 0xff);
-			byte r = (byte) ((rgb >> 16) & 0xff);
-			byte g = (byte) ((rgb >>  8) & 0xff);
-			byte b = (byte) ((rgb >>  0) & 0xff);
+			byte r = (byte) ri;
+			byte g = (byte) gi;
+			byte b = (byte) bi;
 			
-			int index = dmxAddr + 8*i;
-			//System.err.println("Slider " + i + ": index=" + index);
+			int index = dmxAddr + channels*i;
 			
-			packet.data[index+0] = (byte)dimmer.getValue();
-			packet.data[index+1] = r; 
-			packet.data[index+2] = g; 
-			packet.data[index+3] = b; 
-			packet.data[index+4] = w;
-			packet.data[index+5] = 0; // ch6: strobe: unused
-			packet.data[index+6] = 0; // ch7: fade/sound mode: unused 
-			packet.data[index+7] = 0; // speed for ch7: unused 
+			switch (mode) {
+			case RGBWMSPS: 
+				packet.data[index+0] = dimb;
+				packet.data[index+1] = r; 
+				packet.data[index+2] = g; 
+				packet.data[index+3] = b; 
+				packet.data[index+4] = w;
+				packet.data[index+5] = 0; // ch6: strobe: unused
+				packet.data[index+6] = 0; // ch7: fade/sound mode: unused 
+				packet.data[index+7] = 0; // speed for ch7: unused
+				break;
+			case RGBMS:
+				packet.data[index+0] = r;
+				packet.data[index+1] = g; 
+				packet.data[index+2] = b; 
+				packet.data[index+3] = dimb; 
+				packet.data[index+4] = 0; // strobe: unused
+				break;
+			case RGB:
+				// TODO: software dimming
+				packet.data[index+0] = (byte) (dimi*ri/255);
+				packet.data[index+1] = (byte) (dimi*gi/255); 
+				packet.data[index+2] = (byte) (dimi*bi/255); 
+				break;
+			}
 		}
-		if (strobeAddr>-1) {
-			packet.data[strobeAddr-1] = (byte) (controls.strobe.getValue() & 0xff);
+		
+		if (strobeAddr>-1 && enableStrobe) {
+			int strobe = controls.strobe.getValue();
+			packet.data[strobeAddr-1] = (byte) (strobe & 0xff);
 		}
 	}
 
@@ -351,15 +477,12 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
         return Math.PI*deg/180;
     }
 
-
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object src = e.getSource();
-		//System.out.println("stateChanged: src=" + src);
 		
-		if (src instanceof JCheckBox) {
-			JCheckBox c = (JCheckBox) src;
-			boolean sel = c.isSelected();
+		if (src == masterCheck) {
+			boolean sel = masterCheck.isSelected();
 			for (int i=0; i<sliders.length; i++) {
 				sliders[i].setSelected(sel);
 			}
@@ -368,7 +491,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	
 		boolean toggle = controls.toggle.isSelected();
 		boolean setColor = false;
-		if (!controls.sound.isSelected()) {
+		if (!controls.sound.isSelected() && null==beforeStrobeValue) {
 			
 			if (src==master.r) {
 				if (toggle && master.r.getValue()>0) {
@@ -458,3 +581,5 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 		master.setWRGB(color);
 	}
 }
+
+

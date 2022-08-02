@@ -1,5 +1,6 @@
 package com.apdlv.jlight.controls;
 
+import static com.apdlv.jlight.controls.RGBWAUSpotArray.MODE.*;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.MAGENTA;
@@ -29,6 +30,13 @@ import com.apdlv.jlight.dmx.DmxPacket;
 @SuppressWarnings("serial")
 public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxControlInterface, MouseListener {
 
+	enum MODE {
+		CH7_MRGBWAU, // Master, R, G, B, White, Amber, UV (Setting: d100)
+		CH10_MRGBWAUFPS // R, G, B, White, Amber, UV, Flash, Program, Speed
+	}
+	
+	MODE mode = CH10_MRGBWAUFPS;
+	
 	private int dmxAddr;
 	ColorSlider red;
 	RGBWSliders sliders[];
@@ -40,7 +48,7 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		return new Insets(12, 0, 13, 0);
 	}
 	
-	private MySlider dimmer;
+	private MySlider master;
 	private ColorSlider green;
 	private ColorSlider blue;
 	private ColorSlider cold;
@@ -54,7 +62,13 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 	private JCheckBox cbWarm;
 	private JCheckBox cbUV;
 	private JCheckBox link;
-	private RGBWSpotArray linked; 
+	private RGBWSpotArray linked;
+	private MySlider flash;
+	private MySlider program;
+	private MySlider speed;
+	private JCheckBox cbFlash;
+	private JCheckBox cbProgram;
+	private JCheckBox cbSpeed; 
 
 	public RGBWAUSpotArray(int dmxAddr, RGBWSpotArray linked) {
 
@@ -64,24 +78,30 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		setLayout(new FlowLayout());
 		setBorder(BorderFactory.createLineBorder(Color.black));
 		
-		dimmer = new MySlider(0, 255, 0);
-		red    = new ColorSlider(RED, 0, 255, 0);
-		green  = new ColorSlider(GREEN, 0, 255, 0);
-		blue   = new ColorSlider(BLUE, 0, 255, 0);
-		cold   = new ColorSlider(WHITE, 0, 255, 0);		
-		warm   = new ColorSlider(ORANGE.brighter().brighter().brighter().brighter(), 0, 255, 0);
-		uv = new ColorSlider(MAGENTA.brighter().brighter().brighter(), 0, 255, 255);
-
-		add(link = new JCheckBox("Link"));
-		//add(new LabeledPanel(dim  =  new JButton("Dim"), dimmer));
-		//dim.addMouseListener(this);
-		add(new LabeledPanel(cbRed   = new JCheckBox(""), red));
-		add(new LabeledPanel(cbGreen = new JCheckBox(""), green));
-		add(new LabeledPanel(cbBlue  = new JCheckBox(""), blue));
-		add(new LabeledPanel(cbCold  = new JCheckBox(""), cold));
-		add(new LabeledPanel(cbWarm  = new JCheckBox(""), warm));
-		add(new LabeledPanel(cbUV    = new JCheckBox(""), uv));
+		master  = new MySlider(0, 255, 255);
+		red     = new ColorSlider(RED, 0, 255, 0);
+		green   = new ColorSlider(GREEN, 0, 255, 0);
+		blue    = new ColorSlider(BLUE, 0, 255, 0);
+		cold    = new ColorSlider(WHITE, 0, 255, 0);		
+		warm    = new ColorSlider(ORANGE.brighter().brighter().brighter().brighter(), 0, 255, 0);
+		uv      = new ColorSlider(MAGENTA.brighter().brighter().brighter(), 0, 255, 255);		
+		flash   = new MySlider(0, 255, 0);
+		program = new MySlider(0, 255, 0);
+		speed   = new MySlider(0, 255, 0);
 		
+		add(link = new JCheckBox("Link"));
+		add(new LabeledPanel(dim  =  new JButton("Dim"), master));
+		dim.addMouseListener(this);
+		add(new LabeledPanel(cbRed     = new JCheckBox("R"), red));
+		add(new LabeledPanel(cbGreen   = new JCheckBox("G"), green));
+		add(new LabeledPanel(cbBlue    = new JCheckBox("B"), blue));
+		add(new LabeledPanel(cbCold    = new JCheckBox("C"), cold));
+		add(new LabeledPanel(cbWarm    = new JCheckBox("W"), warm));
+		add(new LabeledPanel(cbUV      = new JCheckBox("U"), uv));
+
+		add(new LabeledPanel(cbFlash   = new JCheckBox("F"), flash));
+		add(new LabeledPanel(cbProgram = new JCheckBox("P"), program));
+		add(new LabeledPanel(cbSpeed   = new JCheckBox("S"), speed));
 	}
 	
 	Random rand = new Random();
@@ -103,8 +123,8 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 	public void loop(long count, DmxPacket packet) {
 		
 		if (null!=linked && link.isSelected()) {
-			RGBWSliders master = linked.sliders[0];
-			int wrgb = master.getWRGB();
+			RGBWSliders source = linked.sliders[0];
+			int wrgb = source.getWRGB();
 			int w = (wrgb >> 24) & 0xff;
 			int r = (wrgb >> 16) & 0xff;
 			int g = (wrgb >>  8) & 0xff;
@@ -126,8 +146,12 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		
 		int ofs1 =  0;
 		int ofs2 = 10;
-		//packet.data[dmxAddr   +0] = (byte)dimmer.getValue();
-		//packet.data[dmxAddr+10+0] = (byte)dimmer.getValue();
+		if (mode==CH10_MRGBWAUFPS) {
+			packet.data[dmxAddr+ofs1+1] = (byte)master.getValue();
+			packet.data[dmxAddr+ofs2+1] = (byte)master.getValue();		
+			ofs1++;
+			ofs2++;
+		}
 		
 		if (null!=linked && link.isSelected()) {
 			RGBWSliders src1 = linked.sliders[0];
@@ -151,6 +175,19 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 		
 		packet.data[dmxAddr+ofs2+5] = (byte)warm.getValue();		
 		packet.data[dmxAddr+ofs2+6] = (byte)uv.getValue();
+		
+		switch (mode) {
+		case CH10_MRGBWAUFPS:
+			packet.data[dmxAddr+ofs1+7] = (byte)flash.getValue();			
+			packet.data[dmxAddr+ofs1+8] = (byte)program.getValue();			
+			packet.data[dmxAddr+ofs1+9] = (byte)speed.getValue();			
+
+			packet.data[dmxAddr+ofs2+7] = (byte)flash.getValue();			
+			packet.data[dmxAddr+ofs2+8] = (byte)program.getValue();			
+			packet.data[dmxAddr+ofs2+9] = (byte)speed.getValue();			
+			break;
+		}
+		
 	}
 
 	private void copyRGBW(RGBWSliders src, DmxPacket packet, int offs) {
@@ -205,16 +242,16 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 	@Override
 	public void mousePressed(MouseEvent e) {
 		Object src = e.getSource();
-		if (src == dim) {
-			dimmer.setValue(255-dimmer.getValue());
-		}
+//		if (src == dim) {
+			//master.setValue(255-master.getValue());
+//		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		Object src = e.getSource();
-		if (src == dim) {
-			dimmer.setValue(255-dimmer.getValue());
-		}
+//		if (src == dim) {
+			//master.setValue(255-master.getValue());
+//		}
 	}
 }
