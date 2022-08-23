@@ -65,7 +65,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 	private static final int ADDR_FOGGER = 128; // channel 129
 	private static final int ADDR_STROBE = 200;
 	private static final int ADDR_LASER = 255;
-	private static final int ADDR_MOVING1 = 300-1; // channels 300 - 311
+	private static final int ADDR_MOVING1 = 1-1; // channels 300 - 311
 	private static final int ADDR_LIGHTBAR = 210-1; // channels 210 - 221
 
 	Settings settings;
@@ -165,7 +165,7 @@ public class JLightDMX extends JFrame implements SettingsListener {
 				"Speed" // Inverse - 255 is slowest 
 				); 
 		LightBar lightbar = new LightBar(ADDR_LIGHTBAR, ADDR_STROBE, rgbwSpots);
-		MovingHead moving  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Speed", "Color", "Pattern", "Strobe", "Light", "Progr");
+		MovingHead moving  = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Color", "Pattern", "Strobe", "Light");
 		channelDebugControl = new ChannelDebug();
 		channelTestControl = new ChannelTest();
 		

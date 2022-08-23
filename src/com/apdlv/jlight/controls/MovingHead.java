@@ -129,11 +129,20 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 				}
 				isOff = true;
 				break;
+			case "steady":
+				break;
+			default:				
 			}
+			if (!isOff) {
+				int[] xy = position.getXY();
+				sliders[0].setValue(xy[0]);
+				sliders[1].setValue(xy[1]);
+			}			
 			wasOff = isOff;
 		}
 
-		if (false) {
+		
+		if (true) {
 			int addr = dmxAddr;
 			for (int i=0; i<sliders.length; i++) {
 				MySlider slider = sliders[i];

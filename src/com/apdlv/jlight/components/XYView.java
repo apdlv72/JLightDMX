@@ -83,8 +83,9 @@ public class XYView extends JPanel implements MouseListener, MouseMotionListener
 		int radOuter = 30;
 		int radInner = 95-radOuter;
 		
-		int degOuter = (int) ((loop/2)%360);
-		int degInner = (int) -((3*loop)%360);
+		long speed = loop/4;
+		int degOuter = (int) ((speed/2)%360);
+		int degInner = (int) -((3*speed)%360);
 		
 		double angOuter = deg2rad(degOuter);
 		double angInner = deg2rad(degInner);
