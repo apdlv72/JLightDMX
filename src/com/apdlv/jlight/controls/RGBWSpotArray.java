@@ -37,7 +37,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	protected boolean enableStrobe;
 
 	private int strobeAddr;
-	private Controls controls;
+	protected Controls controls;
 	private RGBWSliders master;
 	private int index;
 	private int lastIndex = 0;
@@ -214,7 +214,7 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	private int channels;
 	private MODE mode;
 	private RGBWSpotArray linked;
-	private JCheckBox link;
+	protected JCheckBox link;
 	private JCheckBox masterCheck; 
 
 	public RGBWSpotArray(int dmxAddr, int strobeAddr, int count) {
@@ -579,6 +579,38 @@ public class RGBWSpotArray extends JPanel implements ChangeListener, DmxControlI
 	public void setRandomColor() {
 		int color = rand.nextInt();
 		master.setWRGB(color);
+	}
+
+	public void setChaseMode(boolean b) {
+		controls.chase.setSelected(b);
+		controls.rand.setSelected(b);
+	}
+
+	public void setMasterWRGB(int wrgb) {
+		master.setWRGB(wrgb);
+	}
+
+	public void setSoundMode(boolean b) {
+		controls.sound.setSelected(b);
+		if (b) {
+			master.getCheck().setSelected(true);
+		}
+	}
+
+	public void incSpeed() {
+		int val = controls.speed.getValue();
+		int min = controls.speed.getMinimum();
+		int max = controls.speed.getMaximum();
+		val = Math.min(max, val+(max-min)/10);
+		controls.speed.setValue(val);
+	}
+
+	public void decSpeed() {
+		int val = controls.speed.getValue();
+		int min = controls.speed.getMinimum();
+		int max = controls.speed.getMaximum();
+		val = Math.max(min, val-(max-min)/10);
+		controls.speed.setValue(val);
 	}
 }
 

@@ -25,4 +25,8 @@ public interface BeatDetectorInterface {
 	void interrupt();
 	
 	void setMeter(LevelMeter meter);
+
+	void incSensitivity();
+
+	void decSensitivity();
 }

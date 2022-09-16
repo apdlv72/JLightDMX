@@ -151,8 +151,7 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 		if (dark==s) {
 			setColors(container, WHITE, BLACK);
 		} else if (light==s) {
-			setColors(container, BLACK, LIGHT_GRAY);
-			
+			setColors(container, BLACK, LIGHT_GRAY);			
 		} else if (black==s) {
 			boolean selected = black.isSelected();
 			Color c = selected ? RED : bg;
@@ -219,6 +218,13 @@ public class Settings extends JPanel implements DmxControlInterface, ActionListe
 			isFull = true;
 		}
 		full.setSelected(isFull);
+	}
+
+	public void toggleBlackout() {		
+		boolean selected = !black.isSelected();
+		black.setSelected(selected);
+		Color c = selected ? RED : bg;
+		super.setBackground(c);					
 	}
 
 }

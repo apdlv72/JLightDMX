@@ -50,6 +50,9 @@ public class ChannelTest extends JPanel implements DmxControlInterface, ChangeLi
 
 	@Override
 	public void loop(long count, DmxPacket packet) {
+		if (!isVisible()) {
+			return;
+		}
 		int address = addressSlider.getValue();		
 		if (address>-1) {
 			for (int i=0; i<16; i++) {

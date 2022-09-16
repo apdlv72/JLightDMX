@@ -52,5 +52,9 @@ public class LightBar extends RGBWSpotArray implements DmxControlInterface, Chan
 			packet.data[a+2] = b;
 			a+=3;
 		}
+	}
+
+	public void setLink(boolean b) {
+		link.setSelected(b);
 	}	
 }

@@ -127,5 +127,14 @@ public class FogMachine extends JPanel implements DmxControlInterface, MouseList
 		if (s==powerButton) {
 			powerSlider.setValue(powerSlider.getMaximum()-powerSlider.getValue());
 		}
-	}	
+	}
+	
+	public void setLaser(boolean b) {
+		laserSlider.setValue(b ? laserSlider.getMaximum() : laserSlider.getMinimum());
+	}
+
+	public void toggleLaser() {
+		boolean set = laserSlider.getValue()>127;
+		laserSlider.setValue(set ? laserSlider.getMinimum() : laserSlider.getMaximum());
+	}
 }

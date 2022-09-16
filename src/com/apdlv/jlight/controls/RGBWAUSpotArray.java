@@ -25,6 +25,7 @@ import javax.swing.event.ChangeListener;
 import com.apdlv.jlight.components.ColorSlider;
 import com.apdlv.jlight.components.LabeledPanel;
 import com.apdlv.jlight.components.MySlider;
+import com.apdlv.jlight.controls.RGBFogArray.Controls;
 import com.apdlv.jlight.dmx.DmxPacket;
 
 @SuppressWarnings("serial")
@@ -253,5 +254,28 @@ public class RGBWAUSpotArray extends JPanel implements ChangeListener, DmxContro
 //		if (src == dim) {
 			//master.setValue(255-master.getValue());
 //		}
+	}
+
+	public void setLink(boolean b) {
+		link.setSelected(b);		
+	}
+
+	public void setUV(boolean b) {
+		cbUV.setSelected(b);
+		if (b) {		
+			red.setValue(0);
+			green.setValue(0);
+			blue.setValue(0);
+			cold.setValue(0);
+			warm.setValue(0);
+			uv.setValue(uv.getMaximum());
+		} else {
+			uv.setValue(0);			
+		}
+	}
+
+	public void toggleUV(boolean b) {
+		setUV(uv.getValue()<128);
+		cbUV.setSelected(false);
 	}
 }

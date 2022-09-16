@@ -7,12 +7,12 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.apdlv.jlight.components.ColorSlider;
 import com.apdlv.jlight.components.LabeledPanel;
 import com.apdlv.jlight.components.MySlider;
 import com.apdlv.jlight.components.XYView;
@@ -21,6 +21,11 @@ import com.apdlv.jlight.dmx.DmxPacket;
 @SuppressWarnings("serial")
 public class MovingHead extends JPanel implements DmxControlInterface, ActionListener {
 	
+	private static final String STEADY = "steady";
+	private static final String WHEELS = "wheels";
+	private static final String WAVES = "waves";
+	private static final String OFF = "off";
+	private static final String BOUNCE = "bounce";
 	private int dmxAddr;
 	private MySlider[] sliders;
 	private XYView position;
@@ -37,12 +42,12 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		
 		JPanel anims = new JPanel();
 		anims.setLayout(new GridLayout(6, 1));
-		anims.add(newButton("Bounce"));
-		anims.add(newButton("Wheels"));
-		anims.add(newButton("Waves"));
+		anims.add(newButton(BOUNCE));
+		anims.add(newButton(WHEELS));
+		anims.add(newButton(WAVES));
 //		anims.add(newButton("Zigzag"));
-		anims.add(newButton("Steady"));
-		anims.add(newButton("Off"));
+		anims.add(newButton(STEADY));
+		anims.add(newButton(OFF));
 		add(anims);
 		
 		this.position = new XYView(65535, 65535);
@@ -111,16 +116,16 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		if (null!=this.effect) {
 			boolean isOff = false;
 			switch (this.effect) {
-			case "bounce":
+			case BOUNCE:
 				position.animateBounce(count);
 				break;
-			case "wheels":
+			case WHEELS:
 				position.animateTwoWheels(count);
 				break;
-			case "waves":
+			case WAVES:
 				position.animateInterference(count);
 				break;
-			case "off":
+			case OFF:
 				if (!wasOff) {
 					position.setIdlePosition();
 					if (sliders[0].getValue()>0) {
@@ -129,7 +134,7 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 				}
 				isOff = true;
 				break;
-			case "steady":
+			case STEADY:
 				break;
 			default:				
 			}
@@ -166,7 +171,35 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		Object o = e.getSource();
 		if (o instanceof JButton) {
 			JButton b = (JButton)o;
-			this.effect = b.getText().toLowerCase();
+			setEffect(b.getText().toLowerCase());
 		}
+	}
+
+	private void setEffect(String name) {
+		this.effect = name.toLowerCase();
+	}
+
+	public void toggleMoving() {
+		
+		MySlider light = getSlider("Light");
+		MySlider color = getSlider("Color");
+		if (light.getValue()>0) {
+			light.setValue(light.getMinimum());
+			setEffect(OFF);
+		} else {
+			light.setValue(light.getMaximum());
+			color.setValue(new Random().nextInt(10)*25);
+			setEffect(BOUNCE);
+		}
+	}
+
+	private MySlider getSlider(String name) {
+		for (MySlider s : sliders) {
+			String n = s.getName();
+			if (n.equals(name)) {
+				return s;
+			}
+		}
+		return null;
 	}
 }

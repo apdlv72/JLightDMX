@@ -54,8 +54,7 @@ public class LevelControl extends JPanel implements BeatDetectorInterface, DmxCo
         setBorder(new EmptyBorder(25, 50, 25, 50));
         meter = new LevelMeter();
         add(meter, BorderLayout.CENTER);			
-        JPanel sliders = new JPanel();
-        LabeledPanel panel1 = new LabeledPanel(new JLabel("Thres"), thres = new MySlider("Thres", JSlider.VERTICAL, 1, 20, 10));
+        JPanel sliders = new JPanel();        LabeledPanel panel1 = new LabeledPanel(new JLabel("Thres"), thres = new MySlider("Thres", JSlider.VERTICAL, 1, 20, 10));
         LabeledPanel panel2 = new LabeledPanel(new JLabel("Reten"), reten = new MySlider("Reten", JSlider.VERTICAL, 1, 20, 15));
 		sliders.add(panel1);
 		sliders.add(panel2);
@@ -136,4 +135,14 @@ public class LevelControl extends JPanel implements BeatDetectorInterface, DmxCo
 	public void setMeter(LevelMeter meter) {
 		this.meter = meter;
 	}
+
+	@Override
+	public void incSensitivity() {
+		System.err.println("LevelControl.incSensitivity NYI");
+	}
+
+	@Override
+	public void decSensitivity() {
+		System.err.println("LevelControl.decSensitivity NYI");
+	}	
 }

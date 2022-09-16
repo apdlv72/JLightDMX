@@ -189,4 +189,13 @@ public class Recorder extends Thread implements BeatDetectorInterface {
 		this.meter = meter;
 	}
 
+	@Override
+	public void incSensitivity() {
+		System.err.println("LevelControl.incSensitivity NYI");
+	}
+
+	@Override
+	public void decSensitivity() {
+		System.err.println("LevelControl.decSensitivity NYI");
+	}	
 }

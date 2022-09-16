@@ -149,5 +149,14 @@ public class DamienQuartz extends Thread implements BeatDetectorInterface {
 	public void setMeter(LevelMeter meter) {
 		this.meter = meter;
 	}
-	
+
+	@Override
+	public void incSensitivity() {
+		System.err.println("DamienQuartz.incSensitivity NYI");
+	}
+
+	@Override
+	public void decSensitivity() {
+		System.err.println("DamienQuartz.decSensitivity NYI");
+	}	
 }
