@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -30,6 +31,7 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 	private MySlider[] sliders;
 	private XYView position;
 	private String effect;
+	private JCheckBox music;
 	
 	@Override
 	public Insets getInsets() {
@@ -42,6 +44,7 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 		
 		JPanel anims = new JPanel();
 		anims.setLayout(new GridLayout(6, 1));
+		//anims.add(this.music = new JCheckBox("Music", true));
 		anims.add(newButton(BOUNCE));
 		anims.add(newButton(WHEELS));
 		anims.add(newButton(WAVES));
@@ -111,8 +114,15 @@ public class MovingHead extends JPanel implements DmxControlInterface, ActionLis
 	
 	boolean wasOff = false;
 	
+	Random rand = new Random();
+	
 	@Override
 	public void loop(long count, DmxPacket packet) {
+		
+//		if (packet.isBeat() && music.isSelected()) {
+//			sliders[2].setValue(rand.nextInt(10)*25);
+//		}
+		
 		if (null!=this.effect) {
 			boolean isOff = false;
 			switch (this.effect) {

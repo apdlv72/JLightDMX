@@ -180,7 +180,7 @@ public class JLightDMX extends JFrame implements SettingsListener, KeyListener {
 				); 
 		lightbar = new LightBar(ADDR_LIGHTBAR, ADDR_STROBE, rgbwSpots);
 		moving = new MovingHead(ADDR_MOVING1, "XPos", "YPos", "Color", "Pattern", "Strobe", "Light");		
-	 	minions = new RGBFogArray(ADDR_MINIONS, ADDR_STROBE, 3);
+	 	//minions = new RGBFogArray(ADDR_MINIONS, ADDR_STROBE, 3);
 	 	strobo = new Stroboscope(ADDR_XENON_FLASH);
 		
 		channelDebugControl = new ChannelDebug();
@@ -191,7 +191,7 @@ public class JLightDMX extends JFrame implements SettingsListener, KeyListener {
 		addControl(panel, pilot);
 		addControl(panel, rgbwSpots);
 		addControl(panel, rgbwauSpots);	
-		addControl(panel, minions);
+		//addControl(panel, minions);
 		addControl(panel, moving);
 		addControl(panel, lightbar);
 		addControl(panel, fogger);
@@ -206,7 +206,7 @@ public class JLightDMX extends JFrame implements SettingsListener, KeyListener {
 		controls.add(pilot);
 		controls.add(rgbwSpots);
 		controls.add(rgbwauSpots);
-		controls.add(minions);
+		//controls.add(minions);
 		controls.add(lightbar);
 		controls.add(fogger);
 		//controls.add(spot);

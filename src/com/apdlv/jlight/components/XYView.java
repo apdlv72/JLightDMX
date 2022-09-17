@@ -12,11 +12,14 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class XYView extends JPanel implements MouseListener, MouseMotionListener {
+
+	private static final int X_MAX = 65535;
+	private static final int Y_MAX = 65535;
 	
 	public static void main2(String[] args) {
 		JFrame frame = new JFrame("XYTest");
 				
-		XYView view = new XYView(65535, 65535);
+		XYView view = new XYView(X_MAX, Y_MAX);
 		
 		frame.add(view);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,16 +46,16 @@ public class XYView extends JPanel implements MouseListener, MouseMotionListener
 		
 		x += view.stepX;
 		y += view.stepY;
-		if (x>65536) {
-			x=65536;
+		if (x>X_MAX) {
+			x=X_MAX;
 			view.stepX = -view.stepX;			
 		} else if (x<0) {
 			x = 0;
 			view.stepX = -view.stepX;			
 		}
 		
-		if (y>65536) {
-			y=65536;
+		if (y>Y_MAX) {
+			y=Y_MAX;
 			view.stepY = -view.stepY;			
 		} else if (y<0) {
 			y = 0;
@@ -64,7 +67,7 @@ public class XYView extends JPanel implements MouseListener, MouseMotionListener
 
 	public void animateInterference(long loop) {
 		XYView view = this;
-		int R = 65535/2;
+		int R = X_MAX/2;
 		int degOuter = (int) ((loop/2)%360);
 		int degInner = (int) ((loop/1)%360);
 		
@@ -79,7 +82,7 @@ public class XYView extends JPanel implements MouseListener, MouseMotionListener
 
 	public void animateTwoWheels(long loop) {
 		XYView view = this;
-		int R = 65535/2;
+		int R = X_MAX/2;
 		int radOuter = 30;
 		int radInner = 95-radOuter;
 		
